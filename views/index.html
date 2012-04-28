@@ -1,0 +1,21 @@
+{{layout 'layout'}}
+
+{{each(i, item) viewModel}}
+
+{{if !!item.overlay }}
+<section>
+	<h3>${item.sportProper} - ${item.category.league} ${item.division}</h3>
+	<div class="logo ${item.category.matchup }" title="${item.category.sportProper} - ${item.category.league}"></div>
+	<div class="overlay">${item.overlay}</div>
+</section>
+{{else}}
+<section>
+	<h3>${item.sportProper} - ${item.category.league} ${item.category.viewDivision}</h3>
+	<a href="${item.category.link}">
+	 	<div class="logo ${item.image}" title="${item.category.sportProper} - ${item.category.league}"></div>
+		<div class="highlight">${item.highlight}</div>
+	</a>
+</section>
+{{/if}}
+
+{{/each}}

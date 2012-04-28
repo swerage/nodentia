@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  	<title>Bäst I Stockholm - vilka är bäst i stan?</title>
+  	<link href="http://fonts.googleapis.com/css?family=Mate+SC|Yellowtail" rel="stylesheet" type="text/css">
+	<link href='http://fonts.googleapis.com/css?family=Patua+One' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.googleapis.com/css?family=Black+Ops+One' rel='stylesheet' type='text/css'>
+	
+	<link rel="stylesheet" href="/stylesheets/style.css" />
+	<link rel="stylesheet" href="/javascripts/lib/jquery-ui-1.8.18.custom/css/ui-lightness/jquery-ui-1.8.18.custom.css" />
+	
+	<script type="text/javascript" src="/javascripts/lib/jquery-1.7.1.min.js"></script>
+	<script type="text/javascript" src="/javascripts/lib/jquery-ui-1.8.18.custom/js/jquery-ui-1.8.18.custom.min.js"></script>
+	
+	<script type="text/javascript" src="/javascripts/nodentia.admin.js"></script>
+	<script type="text/javascript" src="/javascripts/nodentia.admin.eventHandlers.js"></script>
+	
+	<script>
+		(function(){
+			"use strict";
+			
+			$(function(){
+				nodentia.admin.init();				
+			});
+		}());
+	</script>
+</head>
+<body>
+	<section id="topBar"></section>
+	<header>
+		<a href="/" id="title">· bäst · i · stockholm ·</a> 
+ 		<p id="subtitle">vilka är bäst i stan?</p>
+	</header>
+	
+	<section id="main">
+		{{html body}}		
+	</section>
+	
+	<footer>
+		<a href="/about">About</a>
+	</footer>
+</body>
+</html>

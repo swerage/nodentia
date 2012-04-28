@@ -1,0 +1,53 @@
+{{layout false}}
+<div>Teams</div>
+<div id="teams">
+{{each(i, team) viewData.category.teams}}
+	{{partial({teams: viewData.category.teams, selectedTeam: team.abbr}) "_teamRow"}}
+{{/each}}
+</div>
+<input type="button" id="addTeam" value="Add">
+
+<div>Starts</div>
+<input type="text" class="date-picker" value="${viewData.category.starts}" id="starts">
+
+<div>Ends</div>
+<input type="text" class="date-picker" value="${viewData.category.ends}" id="ends">
+
+<div>Sport</div>
+<select id="sport">
+	<option value="-1">Choose...</option>
+	{{each(i, sport) viewData.sports}}
+	<option value="${sport.name}" {{if viewData.category.sport == sport.name}} selected="selected"{{/if}} data-proper="${sport.proper}">
+		${sport.name}
+	</option>
+	{{/each}}
+</select>
+<a id="new-sport">[Ny]</a>
+
+<div>League</div>
+<select id="league">
+	<option value="-1">Choose...</option>
+	{{each(i, league) viewData.leagues}}
+	<option value="${league}" {{if viewData.category.league == league}} selected="selected"{{/if}}>${league}</option>
+	{{/each}}
+</select>
+<a id="new-league">[Ny]</a>
+
+<div>Division</div>
+<select id="division">
+	<option value="-1">Choose...</option>
+	{{each(i, division) viewData.divisions}}
+	<option value="${division}" {{if viewData.category.division == division}} selected="selected"{{/if}}>${division}</option>
+	{{/each}}
+</select>
+<a id="new-division">[Ny]</a>
+
+{{if !!viewData.category.link}}
+<div>Länk</div>
+<div>${viewData.category.link}</div>
+{{/if}}
+
+<div class="right">
+	<input type="button" id="saveCategory" value="Save" />
+	<input type="hidden" id="_id" value="${viewData.category._id}">
+</div>

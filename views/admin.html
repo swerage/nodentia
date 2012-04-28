@@ -1,0 +1,32 @@
+<h3>Admin</h3>
+<div id="admin">
+	<section>
+		<label for="categories">Categories</label>
+		<select id="categories" name="categories" class="admin-select">
+			<option value="-1">Choose...</option>
+			{{each(i, category) viewData.categories}}
+			<option value="${category._id}">${category.sport} - ${category.league} - ${category.division}</option>
+			{{/each}}
+		</select>
+	</section>
+	
+	<section>
+		<label for="games">Games</label>
+		<select id="games" name="games" class="admin-select">
+			<option value="-1">Choose...</option>
+			{{each(i, game) viewData.games}}
+			<option value="${game._id}">${game.home} - ${game.away}</option>
+			{{/each}}
+		</select>
+	</section>	
+	
+	<section>
+		<div>Skapa</div>
+		<input type="button" id="newGame" value="New Game">
+		<input type="button" id="newCategory" value="New Category">
+	</section>
+	
+	<section id="edit-area"></section>
+	
+	<div class="notification game">Game saved</div>
+</div>

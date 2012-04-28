@@ -1,0 +1,11 @@
+{{layout false}}
+<div>
+	<select class="team-row">
+	{{each(i, team) teams}}
+		<option value="${team.abbr}"{{if selectedTeam === team.abbr }} selected="selected"{{/if}} data-team="${JSON.stringify(team)}">
+			${team.name}
+		</option>
+	{{/each}}
+	</select>
+	<span class="remove-team" data-team-abbr="${selectedTeam}">[X]</span>
+</div>

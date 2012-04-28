@@ -1,0 +1,47 @@
+{{layout false}}
+<div>Home Team</div>
+<select id="home">
+	<option value="-1">Choose...</option>
+	{{each(i, team) viewData.teams}}
+	<option value="${team.abbr}" {{if viewData.game.home === team.abbr}} selected="selected"{{/if}}>${team.abbr}</option>
+	{{/each}}
+</select>
+<input type="text" id="homeScore" class="score" value="${viewData.game.homeScore}" />
+
+<div>Away Team</div>
+<select id="away">
+	<option value="-1">Choose...</option>
+	{{each(i, team) viewData.teams}}
+	<option value="${team.abbr}" {{if viewData.game.away === team.abbr}} selected="selected"{{/if}}>${team.abbr}</option>
+	{{/each}}
+</select>
+<input type="text" id="awayScore" class="score" value="${viewData.game.awayScore}" />
+
+<div><input type="checkbox" id="overtimeWin" {{if viewData.game.overtimeWin}} checked="checked" {{/if}} value="1" />Overtime win</div>
+<div><input type="checkbox" id="shootoutWin" {{if viewData.game.shootoutWin}} checked="checked" {{/if}} value="1" />Shootout win</div>
+
+<div>Played </div>
+<input type="text" id="play-date" class="date-picker" value="${viewData.game.dateString}" />
+<input type="text" id="play-time" value="${viewData.game.timeString}" />
+
+<div>Season</div>
+<input type="text" id="season" value="${viewData.game.season}" />
+
+<div>Category</div>
+<select id="category">
+	<option value="-1">Choose...</option>
+	{{each(i, category) viewData.categories}}
+	<option value="${category._id}" 
+	{{if !!viewData.game.category && viewData.game.category._id.toString() === category._id.toString()}}selected="selected"{{/if}}>
+		${category.sport} - ${category.league} - ${category.division}
+	</option>
+	{{/each}}
+</select>
+
+<div>Arena</div>
+<input type="text" id="arena" value="${viewData.game.arena}" />
+
+<div class="right">
+	<input type="button" id="saveGame" value="Save" />
+	<input type="hidden" id="_id" value="${viewData.game._id}">
+</div>

@@ -1,0 +1,228 @@
+@import "reset.css"
+@import "mixins/box-shadow"
+
+html, body 
+	height 100%
+	width 100%
+
+h3
+	font-family 'Mate SC', serif!important
+	font-size 20px!important
+	margin-left 15px!important
+	margin-bottom 10px!important
+	text-align left
+
+.aik 
+	background-image url("../images/aik.png")
+
+.dif
+	background-image url("../images/dif.png")
+
+.hif
+	background-image url("../images/hif.png")
+
+.adh
+	background-image url("../images/adh.png")
+	
+.aikdif
+	background-image url("../images/aikdif.png")
+
+.aikhif
+	background-image url("../images/aikhif.png")
+
+.difaik
+	background-image: url("../images/difaik.png")
+
+.difhif
+	background-image url("../images/difhif.png")
+	
+.aik-icon 
+	background-image url("../images/icon/aik.png")
+	width 48px
+	height 48px
+	display inline-block 
+	
+.dif-icon 
+	background-image url("../images/icon/dif.png")
+	width 48px
+	height 48px
+	display inline-block
+
+.hif-icon 
+	background-image url("../images/icon/hif.png")
+	width 48px
+	height 48px
+	display inline-block
+
+#topBar
+	height 30px
+	width 100%
+	background-color #000
+
+header
+	margin-top 20px!important
+	margin-left auto!important
+	margin-right auto!important
+	width 470px
+	
+	#title
+		font-family 'Mate SC', serif
+		color #000000
+		text-decoration none
+		font-size 46px
+		margin-left 20px
+
+	#subtitle
+		font-family 'Yellowtail', cursive
+		font-size 24px
+		margin-left 260px
+		margin-top 5px
+	
+	nav
+		width 470px
+		border 1px solid Black
+		margin-top 10px
+
+#main
+	min-height 100px
+	margin-left auto!important
+	margin-right auto!important
+	width 470px 
+	
+	section
+		margin-top 10px
+		margin-bottom 10px
+		position relative
+		
+		div.logo
+			background-position center center
+			border 1px solid Black
+			border-radius 20px 20px 20px 20px
+			height 110px
+			width 470px
+			mix-box-shadow 3px
+			margin-bottom 20px
+		
+		div.result
+			font-family 'Patua One', cursive;
+			text-align center
+			font-size 32px
+			line-height 50px
+		
+		div.details 
+			text-align center
+			color #666
+			margin-top 5px
+			font-family sans-serif
+			font-variant small-caps
+		
+		div.overlay 
+			height 110px
+			width 470px
+			background-image url("../images/overlay.png")
+			font-family 'Black Ops One', cursive
+			text-shadow: 3px 3px 3px #000;
+			color #FFFFFF
+			font-size 36px
+			text-align center
+			padding-top 40px
+			border-radius 20px 20px 20px 20px
+			position absolute
+			top 30px
+	
+		div.highlight 
+			color #FFFFFF
+			font-family 'Black Ops One',cursive
+			font-size 56px
+			position absolute
+			text-shadow 3px 3px 3px #000000
+			top 60px
+			text-align center
+			width 470px
+			
+	#admin 
+		margin-top 20px
+		margin-left auto!important
+		margin-right auto!important
+		width 470px
+		
+		section 
+			margin-left 20px
+		
+		#categories
+			position relative
+			left 15px
+		#teams
+			position relative
+			left 22px
+		#games
+			position relative
+			left 39px
+		
+		#season-edit-area, #team-edit-area, #game-edit-area
+			display none
+		
+		#addTeam
+			margin-top 10px
+		
+		.remove-team
+			cursor pointer
+		
+		#edit-area
+			border 1px solid Black
+			margin-top 10px
+			padding 10px
+			border-radius 5px 5px 5px 5px
+			display none
+			overflow: hidden
+			_overflow: visible /* for IE */
+			_zoom: 1 /* for IE */
+			
+			
+			div
+				margin-top 5px
+			
+			input.score
+				width 20px
+				
+			input#play-time
+				width 40px
+				
+		#newGame
+			margin-left 87px
+		
+		.notification
+			display none
+
+.right
+	float right
+
+footer
+	border-top 2px solid Black !important
+	font-size 18px !important
+	font-variant small-caps !important
+	margin-bottom 50px !important
+	padding-top 10px !important
+	text-align center
+	width 475px !important
+	margin-left auto!important
+	margin-right auto!important
+	width 470px
+	
+	a
+		color #777777
+		text-decoration none
+		margin-left 40px
+	
+	a:first-child
+		margin-left 0
+	
+	#contact
+		font-variant normal
+		margin-top 20px
+		
+		a
+			color: #000000
+			font-family Georgia
+			font-size 16px
+			margin-top 10px
