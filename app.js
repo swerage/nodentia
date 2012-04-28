@@ -3,9 +3,16 @@
  */
 
 var express = require('express')
-  , routes = require('./routes');
+  , routes = require('./routes')
+  , config = require('./config');
 
-var app = module.exports = express.createServer();
+function authorize(username, password) {
+    return config.username === username & config.password === password;
+}
+
+var app = module.exports = express.createServer(express.basicAuth(authorize));
+
+//Auth
 
 // Configuration
 
