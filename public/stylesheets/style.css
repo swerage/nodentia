@@ -57,6 +57,14 @@ h3 {
   height: 30px;
   width: 100%;
   background-color: #000;
+  text-align: center;
+  padding-top: 5px;
+}
+#topBar div.tweet-button {
+  display: inline-block;
+  position: relative;
+  top: -10px;
+  left: 15px;
 }
 header {
   margin-top: 20px !important;
@@ -141,13 +149,12 @@ header nav {
   text-align: center;
   width: 470px;
 }
+#main #about p {
+  margin-bottom: 20px;
+}
 #main #about p.description {
   margin-top: 20px;
-  margin-bottom: 20px;
   font-style: italic;
-}
-#main #about p.links {
-  margin-bottom: 20px;
 }
 #main #admin {
   margin-top: 20px;

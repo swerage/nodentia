@@ -12,6 +12,7 @@
 	<script type="text/javascript" src="/javascripts/lib/jquery-1.7.1.min.js"></script>
 	<script type="text/javascript" src="/javascripts/lib/jquery-ui-1.8.18.custom/js/jquery-ui-1.8.18.custom.min.js"></script>
 	
+	<script typr="text/javascript" src="/javascripts/plugins.js"></script>
 	<script type="text/javascript" src="/javascripts/nodentia.admin.js"></script>
 	<script type="text/javascript" src="/javascripts/nodentia.admin.eventHandlers.js"></script>
 	
@@ -26,7 +27,10 @@
 	</script>
 </head>
 <body>
-	<section id="topBar"></section>
+	<section id="topBar">
+		<div class="tweet-button"><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.bästistockholm.se" data-lang="sv">Tweeta</a></div>
+		<div class="fb-like" data-href="http://www.xn--bstistockholm-bfb.se/" data-send="false" data-width="300" data-colorscheme="dark" data-show-faces="false"></div>
+	</section>
 	<header>
 		<a href="/" id="title">· bäst · i · stockholm ·</a> 
  		<p id="subtitle">vilka är bäst i stan?</p>
@@ -39,5 +43,6 @@
 	<footer>
 		<a href="/about">About</a>
 	</footer>
+	<div id="fb-root"></div>
 </body>
 </html>
