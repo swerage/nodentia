@@ -50,6 +50,7 @@ function initCategoryCallbacks() {
 				ends: '2012-10-21',
 				latestGame: {}
 			}, function(err, team) { 
+				
 				db.teams.findOne({ abbr: 'AIK' }, function(err, aik){
 					db.categories.update({_id: team._id }, { $push: { teams: aik }});
 					
@@ -123,6 +124,7 @@ function initCategoryCallbacks() {
 						
 						console.log("done.");
 						onComplete();
+						process.exit(1);
 					});
 				});
 			});

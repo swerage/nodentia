@@ -10,7 +10,7 @@ function authorize(username, password) {
     return config.username === username & config.password === password;
 }
 
-var app = module.exports = express.createServer(express.basicAuth(authorize));
+var app = module.exports = express.createServer();
 
 //Auth
 
@@ -48,7 +48,7 @@ app.get('/g/:sport/:division', routes.show);
 app.get('/admin/game/edit', routes.editGame);
 app.get('/admin/category/edit', routes.editCategory);
 app.get('/admin/teamrow/create', routes.addTeamRow);
-app.get('/admin', routes.admin);
+app.get('/admin', express.basicAuth(authorize), routes.admin);
 app.get('/about', routes.about);
 
 //Routes - Commands
