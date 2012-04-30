@@ -141,6 +141,14 @@ header nav {
   text-align: center;
   width: 470px;
 }
+#main #about p.description {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+#main #about p.links {
+  margin-bottom: 20px;
+}
 #main #admin {
   margin-top: 20px;
   margin-left: auto !important;

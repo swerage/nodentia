@@ -117,3 +117,7 @@ exports.deleteTeamRow = function(req, res) {
 		res.send({ ok: status });
 	});
 };
+
+exports.about = function(req, res) {
+	res.render('about.html');
+};
