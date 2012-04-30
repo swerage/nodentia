@@ -7,6 +7,8 @@ lib-cov
 *.pid
 *.gz
 
+.DS_Store
+
 config.js
 db/reset_server.js
 
