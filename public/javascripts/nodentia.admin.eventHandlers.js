@@ -1,3 +1,5 @@
+window.nodentia = window.nodentia || {};
+
 window.nodentia.admin.eventHandlers = (function(){
 	var settings, bind, bindPlugins;
 	

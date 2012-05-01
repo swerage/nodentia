@@ -1,4 +1,4 @@
-window.nodentia = {};
+window.nodentia = window.nodentia || {};
 
 nodentia.admin = (function() {
 	var init, removeTeam, renderGameEditor, renderCategoryEditor, saveCategory, saveGame;
