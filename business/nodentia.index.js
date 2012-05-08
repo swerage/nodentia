@@ -64,7 +64,7 @@ exports.getShowData = function(sport, division, callback) {
 		if (!game){
 			callback(err, null);
 		} else {
-			game.styleClass = game.winner.toLowerCase();
+			game.styleClass = !!game.winner ? game.winner.toLowerCase() : game.home.toLowerCase() + game.away.toLowerCase();
 			game.title = game.winner;
 
 			callback(err, game);
