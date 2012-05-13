@@ -11,6 +11,10 @@ exports.getCategoryViewModel = function(categories) {
 		model.division = category.division === 'dam' ? "- Dam" : category.division;
  		model.sportProper = this.toProperCase(category.sport);
 		
+		if (!!category.latestGame.home) {
+			model.category.matchup = category.latestGame.home.toLowerCase() + category.latestGame.away.toLowerCase()
+		}
+		
 		if(startDate > today) { 
 			model.daysLeft = getDayOfYear(startDate) - getDayOfYear(today);
 			model.overlay = model.daysLeft + " dagar kvar";
