@@ -59,11 +59,13 @@ exports.getShowData = function(sport, division, callback) {
 		criteria["category.division"] = 'herr';
 	}
 
-	db.games.findOne(criteria, function(err, game){
+	db.games.find(criteria, function(err, games){
+		var game;
 		
-		if (!game){
+		if (!games[0]){
 			callback(err, null);
 		} else {
+			game = games[0];
 			game.styleClass = !!game.winner ? game.winner.toLowerCase() : game.home.toLowerCase() + game.away.toLowerCase();
 			game.title = game.winner;
 
@@ -158,33 +160,41 @@ function saveGameInDB(game, callback) {
 	  , arena: game.arena					
 	};
 	
-	game._id = game._id ? { _id:  db.ObjectId(game._id) } : null;
-	
-	db.games.update(game._id, { $set : data }, { upsert: true }, function(err) {
-		if (!err) {
+	if (!!game._id) {
+		db.games.update({ _id:  db.ObjectId(game._id) }, { $set : data }, { upsert: true }, function(err) { 
+			saveGameCallback(err, data, callback); 
+		});
+	} else {
+		db.games.insert(data, function(err) { 
+			saveGameCallback(err, data, callback);
+		});
+	}
+}
+
+function saveGameCallback(err, data, callback) {
+	if (!err) {
+		
+		exports.getCategory(data.category._id.toString(), function(category) {
+			var dirty = false
+			  , categoryId;
+							
+			if (!category.latestGame.played || category.latestGame.played < data.played) {
+				category.latestGame = data;
+				dirty = true;
+			}
 			
-			exports.getCategory(data.category._id.toString(), function(category) {
-				var dirty = false
-				  , categoryId;
-								
-				if (!category.latestGame.played || category.latestGame.played < data.played) {
-					category.latestGame = data;
-					dirty = true;
-				}
+			if (!category.starts || category.starts > data.played) {
+				category.starts = data.played;
+				dirty = true;
+			} 
+			
+			if (dirty) {
+				categoryId = category._id.toString()
+				delete category._id;
 				
-				if (!category.starts || category.starts > data.played) {
-					category.starts = data.played;
-					dirty = true;
-				} 
-				
-				if (dirty) {
-					categoryId = category._id.toString()
-					delete category._id;
-					
-					db.categories.update({ _id: db.ObjectId(categoryId) }, { $set: category });
-				}
-			});
-		}
-		callback(!err);
-	});
+				db.categories.update({ _id: db.ObjectId(categoryId) }, { $set: category });
+			}
+		});
+	}
+	callback(!err);
 }

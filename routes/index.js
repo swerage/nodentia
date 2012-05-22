@@ -12,7 +12,7 @@ exports.show = function(req, res) {
 		division = req.params.division;
 	
 	bz.getShowData(sport, division, function(err, game) {
-		
+
 		if (!game) {
 			res.redirect("back");
 		} else {
