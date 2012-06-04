@@ -1,8 +1,8 @@
-var bz = require('../business/nodentia.index')
+var bz = require('../business/nodentia')
   , formatter = require('../business/nodentia.formatter');
 
 exports.index = function(req, res) {
-	bz.getIndexData(function(err, viewModel){
+	bz.getIndexViewModel(function(err, viewModel){
 		res.render('index.html', { viewModel: viewModel });
 	});
 };
@@ -11,7 +11,7 @@ exports.show = function(req, res) {
 	var sport = req.params.sport,
 		division = req.params.division;
 	
-	bz.getShowData(sport, division, function(err, game) {
+	bz.getShowViewModel(sport, division, function(err, game) {
 
 		if (!game) {
 			res.redirect("back");
@@ -26,7 +26,7 @@ exports.show = function(req, res) {
 
 exports.admin = function(req, res) {
 	
-	bz.getAdminData(function(err, data) {
+	bz.getAdminViewModel(function(err, data) {
 		res.render('admin.html', { viewData: data });
 	});
 };
