@@ -1,0 +1,43 @@
+exports.schemas = (function() {
+	var mongoose, Category, Game, ObjectId, Team;
+	
+	mongoose = require('mongoose');
+	ObjectId = mongoose.Schema.ObjectId;
+	
+	Team = new mongoose.Schema({
+		abbr: String
+	  , name: String
+	});
+	
+	Category = new mongoose.Schema({ 
+	  	sport: String 
+	  ,	league: String
+	  ,	division: String
+	  ,	link: String
+	  ,	teams: [{ type: ObjectId, ref: 'Team' }]
+	  ,	matchup: String
+	  ,	starts: Date
+	  ,	ends: Date
+	  ,	latestGame: { type: ObjectId, ref: 'Game' }
+	});
+	
+	Game = new mongoose.Schema({
+	    home: { type: ObjectId, ref: 'Team' }
+	  , away: { type: ObjectId, ref: 'Team' }
+	  , homeScore: Number
+	  , awayScore: Number
+	  , winner: { type: ObjectId, ref: 'Team' }
+	  , overtimeWin: Boolean
+	  , shootoutWin: Boolean
+	  , played: Date
+	  , season: String
+	  , category: { type: ObjectId, ref: 'Category' }
+	  , arena: String					
+	});
+	
+	return {
+		categorySchema: Category
+	  , gameSchema: Game
+	  ,	teamSchema: Team
+	}
+}());
