@@ -3,11 +3,15 @@ var databaseUrl = 'nodentia_db'
   , db = require('mongojs').connect(databaseUrl, collections)
   , formatter = require('../business/nodentia.formatter')
   , _ = require('../libs/underscore.js')
-  , model = require('../models/Team')
   , mongoose = require('mongoose')
-  , conn = mongoose.createConnection('mongodb://localhost/nodentia_db');
+  , conn = mongoose.createConnection('mongodb://localhost/nodentia_db')
+  , category = require('../models/category')['category']
+  , game = require('../models/game')['game']
+  , team = require('../models/team')['team'];
 
-model.team.establishDatabaseConnection(conn);
+game.establishDatabaseConnection(conn);
+team.establishDatabaseConnection(conn);
+category.establishDatabaseConnection(conn);
 
 exports.deleteTeamFromCategory = function(categoryId, teamAbbr, callback) {
 	db.categories.update({ _id : db.ObjectId(categoryId) }, { $pull : { "teams" : { "abbr": teamAbbr } } });
@@ -20,7 +24,7 @@ exports.getAdminViewModel = function(callback) {
 	db.categories.find(function(err, categories){
 		result.categories = categories;
 		
-		db.teams.find(function(err, teams){
+		team.getAll(function(teams) {
 			result.teams = teams;
 			
 			db.games.find(function(err, games){
@@ -39,7 +43,7 @@ exports.getDivisions = function(callback) {
 };
 	
 exports.getGameById = function(id, callback) {
-	db.games.findOne({ _id: db.ObjectId(id) }, function(err, game){
+	game.getGame(id, function(game){
 		callback(game);
 	});
 };
@@ -86,7 +90,7 @@ exports.getCategories = function(callback) {
 };
 	
 exports.getCategory = function(id, callback) {
-	db.categories.findOne({ _id: db.ObjectId(id) }, function(err, category){
+	category.getCategory(id, function(category){
 		callback(category);
 	});
 };
@@ -96,15 +100,9 @@ exports.getSports = function(callback) {
 		callback(sports);
 	});
 };
-	
-exports.getTeams = function(callback) {
-	team.getAll(function(teams) {
-		callback(teams);
-	});
-};
 
-exports.getTeamsNotIn = function(existingTeams, callback) {
-	db.teams.find(function(err, teams){
+exports.getTeams = function(callback) {
+	team.getAll(function(teams){
 		callback(teams);
 	});
 };

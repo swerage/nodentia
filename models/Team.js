@@ -1,13 +1,5 @@
-var team = (function() {
-	var addTeam, establishConnection, getAll, getModel, getSchema, Team, mongoose, schema;
-	
-	(function init() {
-		mongoose = require('mongoose');
-		schema = new mongoose.Schema({
-			abbr: String
-		  , name: String
-		});
-	}());
+exports.team = (function() {
+	var addTeam, establishConnection, getAll, getModel, Team, mongoose, schema;
 	
 	addTeam = function (doc, callback) {
 		var newTeam = new Team();
@@ -20,6 +12,7 @@ var team = (function() {
 	};
 	
 	establishDatabaseConnection = function(connection) {
+		schema = require('../db/schemas')["schemas"].teamSchema;
 		Team = connection.model('team', schema);
 	};
 	
@@ -33,10 +26,6 @@ var team = (function() {
 		return Team;
 	};
 	
-	getSchema = function() {
-		return schema;
-	};
-	
 	return {
 		addTeam: addTeam
 	  ,	establishDatabaseConnection: establishDatabaseConnection
@@ -44,5 +33,3 @@ var team = (function() {
 	  ,	getModel: getModel
 	}
 }());
-
-exports.team = team;

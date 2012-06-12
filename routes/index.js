@@ -107,7 +107,7 @@ exports.saveCategory = function(req, res) {
 };
 
 exports.addTeamRow = function(req, res) {
-	bz.getTeamsNotIn(req.params.teams, function(teams){
+	bz.getTeams(function(teams){
 		res.render('_teamRow.html', { teams: teams, selectedTeam: '' });
 	});
 };
