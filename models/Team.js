@@ -6,8 +6,8 @@ exports.team = (function() {
 		newTeam.abbr = doc.abbr;
 		newTeam.name = doc.name;
 		
-		newTeam.save(function(e) {
-			callback();
+		newTeam.save(function(e, savedTeam) {
+			callback(savedTeam);
 		});
 	};
 	

@@ -1,8 +1,9 @@
 exports.schemas = (function() {
-	var mongoose, Category, Game, ObjectId, Team;
+	var mongoose, Category, Game, ObjectId, Team, _;
 	
 	mongoose = require('mongoose');
 	ObjectId = mongoose.Schema.ObjectId;
+	_ = require('../libs/underscore');
 	
 	Team = new mongoose.Schema({
 		abbr: String
@@ -14,7 +15,7 @@ exports.schemas = (function() {
 	  ,	league: String
 	  ,	division: String
 	  ,	link: String
-	  ,	teams: [{ type: ObjectId, ref: 'Team' }]
+	  ,	teams: [Team]
 	  ,	matchup: String
 	  ,	starts: Date
 	  ,	ends: Date
@@ -22,11 +23,11 @@ exports.schemas = (function() {
 	});
 	
 	Game = new mongoose.Schema({
-	    home: { type: ObjectId, ref: 'Team' }
-	  , away: { type: ObjectId, ref: 'Team' }
+	    home: [Team]
+	  , away: [Team]
 	  , homeScore: Number
 	  , awayScore: Number
-	  , winner: { type: ObjectId, ref: 'Team' }
+	  , winner: [Team]
 	  , overtimeWin: Boolean
 	  , shootoutWin: Boolean
 	  , played: Date

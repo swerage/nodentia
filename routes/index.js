@@ -113,7 +113,7 @@ exports.addTeamRow = function(req, res) {
 };
 
 exports.deleteTeamRow = function(req, res) {
-	bz.deleteTeamFromCategory(req.body.categoryId, req.body.teamAbbr, function(status){
+	bz.deleteTeamFromCategory(req.body.categoryId, req.body.teamId, function(status){
 		res.send({ ok: status });
 	});
 };

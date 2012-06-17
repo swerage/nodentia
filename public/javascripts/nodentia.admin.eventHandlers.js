@@ -87,9 +87,9 @@ window.nodentia.admin.eventHandlers = (function(){
 		
 		$(document).on("click", ".remove-team", function() {
 			var categoryId = $("#_id").val(),
-				teamAbbr = $(this).data("team-abbr");
+				teamId = $(this).data("team-_id");
 			
-			nodentia.admin.removeTeam(categoryId, teamAbbr, function(ok) {
+			nodentia.admin.removeTeam(categoryId, teamId, function(ok) {
 				if (ok) {
 					$(this).closest("div").remove();
 				}

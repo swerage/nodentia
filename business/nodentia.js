@@ -13,9 +13,10 @@ game.establishDatabaseConnection(conn);
 team.establishDatabaseConnection(conn);
 category.establishDatabaseConnection(conn);
 
-exports.deleteTeamFromCategory = function(categoryId, teamAbbr, callback) {
-	db.categories.update({ _id : db.ObjectId(categoryId) }, { $pull : { "teams" : { "abbr": teamAbbr } } });
-	callback(true);
+exports.deleteTeamFromCategory = function(categoryId, teamId, callback) {
+	category.removeTeamFromCategory(function() {
+		callback();
+	});
 };
 
 exports.getAdminViewModel = function(callback) {
