@@ -1,14 +1,26 @@
 exports.game = (function() {
-	var addGame, establishDatabaseConnection, eventEmitter, events, Game, getAllGames, getGame, mongoose, saveGame, schema;
+	var addGame, establishDatabaseConnection, eventEmitter, eventHandling, Game, getAllGames, getGame, mongoose, saveGame, schema, _;
 	
-	events = require('events');
-	eventEmitter = new events.EventEmitter();
+	eventHandling = require('../business/eventHandling')['eventHandling'];
+	eventEmitter = eventHandling.getEventEmitter();
+	_ = require('../libs/underscore');
 	
-	addGame = function(callback) {
+	addGame = function(values, callback) {
 		var game = new Game();
-		game.save(function(e, savedGame){
-			callback(savedGame);
-		})
+		
+		game.home 		 = 	values.home;
+		game.away 		 = 	values.away;
+		game.homeScore 	 =  values.homeScore;
+		game.awayScore 	 =  values.awayScore;
+		game.overtimeWin = 	values.overtimeWin;
+		game.shootoutWin = 	values.shootoutWin;
+		game.played 	 = 	values.played;
+		game.season 	 = 	values.season;
+		game.category 	 = 	values.category;
+		game.arena 	 	 = 	values.arena;
+		game.latestGame  = 	values.latestGame;
+		
+		saveGame(game, callback);
 	};
 	
 	establishDatabaseConnection = function(connection) {
@@ -23,7 +35,7 @@ exports.game = (function() {
 	};
 	
 	getGame = function(id, callback) {
-		Game.findById(id, function(e, game) {
+		Game.findOne({ _id: id }, function(e, game) {
 			callback(game);
 		});
 	};
@@ -37,6 +49,18 @@ exports.game = (function() {
 		Game.find({ _id: game._id }).remove(function() {
 			eventEmitter.emit('gameWasRemoved', game._id);
 			callback();
+		});
+	};
+	
+	saveGame = function(game, callback) {
+		game.save(function(e, savedGame) {
+			getAllGames(function(games) {
+				var mostRecentGame = _.max(games, function(current) { return current.played; })
+				  , categoryId = savedGame.category;
+				
+				eventEmitter.emit('updateLatestGameForCategory', { categoryId: categoryId, game: mostRecentGame });
+				callback(savedGame);
+			});
 		});
 	};
 	

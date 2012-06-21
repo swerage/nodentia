@@ -1,13 +1,24 @@
 exports.category = (function() {
-	var addCategory, addTeamToCategory, Category, establishDatabaseConnection, eventEmitter, events, getCategory, getAllDivisions, 
-		getModel, mongoose, removeTeamFromCategory, _;
+	var addCategory, addTeamToCategory, Category, checkLatestGame, establishDatabaseConnection, eventEmitter, eventHandling, 
+	getCategory, getAllDivisions, getModel, mongoose, removeTeamFromCategory, updateLatestGame, _;
 	
-	events = require('events');
-	eventEmitter = new events.EventEmitter();
+	eventHandling = require('../business/eventHandling')['eventHandling'];
+	eventEmitter = eventHandling.getEventEmitter();
 	_ = require('../libs/underscore');
 	
-	addCategory = function(callback) {
+	addCategory = function(props, callback) {
 		var category = new Category();
+		
+		category.sport = props.sport; 
+		category.league = props.league;
+		category.division = props.division;
+		category.link = props.link;
+		category.starts = props.starts;
+		category.ends = props.ends;
+		category.latestGame = props.latestGame;
+		category.teams = props.teams;
+		
+		category.matchup = getMatchupFromTeams(category.teams);
 		
 		category.save(function(e, savedCategory) {
 			callback(savedCategory);
@@ -17,10 +28,30 @@ exports.category = (function() {
 	addTeamToCategory = function(category, team, callback) {
 
 		category.teams.push(team);
-		category.matchup = getMatchupFromTeams(category.teams);			
+		category.matchup = getMatchupFromTeams(category.teams);
 		category.save(function() {
 			callback();
 		})
+	};
+	
+	checkLatestGame = function(gameId, callback) {
+		Category.findOne({ 'latestGame._id': gameId }, function (e, category) {
+			
+			if (!!category && !!category.save) {
+				category.latestGame = null;
+				category.save(function(e, savedCategory) {
+					eventEmitter.emit('latestGameWasClearedForCategory', savedCategory._id);
+					
+					if (!!callback) {
+						callback(savedCategory);
+					}
+				});
+			} else {
+				if (!!callback) {
+					callback(category);
+				}
+			}
+		});
 	};
 	
 	establishDatabaseConnection = function(connection) {
@@ -56,27 +87,47 @@ exports.category = (function() {
 		});
 	};
 	
+	updateLatestGame = function(params, callback) {
+		getCategory(params.categoryId, function(category) {
+			
+			if (!!category && category.latestGame.played < params.game.played) {
+				category.latestGame = params.game;
+				
+				category.save(function(e, updatedCategory) {
+					if (!!callback) {
+						callback(updatedCategory);
+					}
+				});
+			} else {
+				if (!!callback) {
+					callback(category);
+				}
+				
+			}
+		});
+	};
+	
 	function getMatchupFromTeams(teams) {
 		return _.pluck(teams, 'abbr').join('');
 	}
 	
-	eventEmitter.on('gameWasRemoved', function(gameId, callback) {
-		Category.find({ 'latestGame._id': gameId }, function (e, cat){
-			cat.latestGame = {};
-			cat.save(function() {
-				callback();
-			});
-		});
-		
+	eventEmitter.on('updateLatestGameForCategory', function(params){
+		updateLatestGame(params, params.callback);
+	});
+	
+	eventEmitter.on('gameWasRemoved', function(params) {
+		checkLatestGame(params.gameId, params.callback);
 	});
 	
 	return {
 	  	addCategory: addCategory
 	  ,	addTeamToCategory: addTeamToCategory
+	  , checkLatestGame: checkLatestGame
 	  ,	establishDatabaseConnection: establishDatabaseConnection
 	  , getAllDivisions: getAllDivisions
 	  ,	getCategory: getCategory
 	  , getModel: getModel	
 	  , removeTeamFromCategory: removeTeamFromCategory
+	  , updateLatestGame: updateLatestGame
 	}
 }());
