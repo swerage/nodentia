@@ -14,7 +14,7 @@ exports.schemas = (function() {
 	  	sport: String 
 	  ,	league: String
 	  ,	division: String
-	  ,	link: String
+	  ,	route: String
 	  ,	teams: [Team]
 	  ,	matchup: String
 	  ,	starts: Date

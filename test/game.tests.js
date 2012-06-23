@@ -14,9 +14,7 @@ describe('Games', function() {
 			team.addTeam({ abbr: 'T2', name: 'Team2' }, function(t2) {
 				category.addCategory({ sport: 'Kast med liten gubbe'}, function(cat) {
 					
-					game.addGame({ home: t1, away: t2, homeScore: 2, awayScore: 1, overtimeWin: false, shootoutWin: true, 
-						played: new Date('2012-01-01'), season: '2012', category: cat, arena: 'Buddy Arena' }, function(newGame) {
-								
+					game.addGame({ home: t1, away: t2, homeScore: 2, awayScore: 1, overtimeWin: false, shootoutWin: true, played: new Date('2012-01-01'), season: '2012', category: cat, arena: 'Buddy Arena' }, function(newGame) {								
 						testGame = newGame;
 						done();
 					});
@@ -37,6 +35,12 @@ describe('Games', function() {
 		testGame.home[0].should.be.a('object').and.have.property('abbr', 'T1'); 
 		testGame.home[0].should.be.a('object').and.have.property('name', 'Team1');
 		
+		testGame.away[0].should.be.a('object').and.have.property('abbr', 'T2'); 
+		testGame.away[0].should.be.a('object').and.have.property('name', 'Team2');
+		
+		testGame.winner.length.should.not.equal(0);
+		testGame.winner[0].should.be.a('object').and.have.property('_id', testGame.home[0]._id);
+		
 		testGame.homeScore.should.equal(2);
 		testGame.awayScore.should.equal(1);
 		testGame.overtimeWin.should.equal(false);
@@ -48,7 +52,26 @@ describe('Games', function() {
 		
 		done();
 	});
-
+	
+	it('sets a winner when a game is added if there is one', function(done) {
+		testGame.winner.length.should.not.equal(0);
+		testGame.winner[0].abbr.should.equal('T1');
+		done();
+	});
+	
+	it('does not set a winner if there isnt one', function(done) {
+		team.addTeam({ abbr: 'T3', name: 'Team3'}, function(t3) {
+			team.addTeam({ abbr: 'T4', name: 'Team4' }, function(t4) {
+				category.addCategory({ sport: 'Whatever' }, function(cat) {					
+					game.addGame({ home: t3, away: t4, homeScore: 1, awayScore: 1, overtimeWin: false, shootoutWin: true, played: new Date('2012-01-01'), season: '2012', category: cat, arena: 'Buddy Arena' }, function(newGame) {
+						newGame.winner.length.should.equal(0);
+						done();
+					});
+				});
+			});
+		});
+	});
+	
 	it('removes a game', function(done) {
 		game.removeGame(testGame, function() {
 			game.getAllGames(function(games) {
@@ -107,6 +130,17 @@ describe('Games', function() {
 					});
 				});
 			});
+		});
+	});
+
+	it('updates the winner when the scores change', function(done) {
+		testGame.winner.length.should.not.equal(0);
+		testGame.winner[0].abbr.should.equal('T1');
+		testGame.awayScore = 3;
+		
+		game.saveGame(testGame, function(savedGame) {
+			savedGame.winner[0].abbr.should.equal('T2');
+			done();
 		});
 	});
 });

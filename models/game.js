@@ -18,7 +18,10 @@ exports.game = (function() {
 		game.season 	 = 	values.season;
 		game.category 	 = 	values.category;
 		game.arena 	 	 = 	values.arena;
-		game.latestGame  = 	values.latestGame;
+		
+		if (+game.homeScore !== +game.awayScore) {
+			game.winner = game.homeScore > game.awayScore ? game.home : game.away;
+		}
 		
 		saveGame(game, callback);
 	};
@@ -53,6 +56,12 @@ exports.game = (function() {
 	};
 	
 	saveGame = function(game, callback) {
+		if (+game.homeScore !== +game.awayScore) {
+			game.winner = game.homeScore > game.awayScore ? game.home : game.away;
+		} else {
+			game.winner = [];
+		}
+		
 		game.save(function(e, savedGame) {
 			getAllGames(function(games) {
 				var mostRecentGame = _.max(games, function(current) { return current.played; })

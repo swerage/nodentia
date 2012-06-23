@@ -1,6 +1,6 @@
 exports.category = (function() {
 	var addCategory, addTeamToCategory, Category, checkLatestGame, establishDatabaseConnection, eventEmitter, eventHandling, 
-	getCategory, getAllDivisions, getModel, mongoose, removeTeamFromCategory, updateLatestGame, _;
+	getAllCategories, getAllDivisions, getAllLeagues, getCategoryById, getCategoryByRoute, getModel, mongoose, removeTeamFromCategory, updateLatestGame, _;
 	
 	eventHandling = require('../business/eventHandling')['eventHandling'];
 	eventEmitter = eventHandling.getEventEmitter();
@@ -12,7 +12,7 @@ exports.category = (function() {
 		category.sport = props.sport; 
 		category.league = props.league;
 		category.division = props.division;
-		category.link = props.link;
+		category.route = props.route;
 		category.starts = props.starts;
 		category.ends = props.ends;
 		category.latestGame = props.latestGame;
@@ -59,17 +59,34 @@ exports.category = (function() {
 		Category = connection.model('category', schema);
 	};
 	
+	getAllCategories = function(callback) {
+		Category.find({}, function(e, categories){
+			callback(categories);
+		});
+	};
+		
 	getAllDivisions = function(callback) {
-		Category.find({ }, 'division', function (e, divisions){
-			var _ = require('../libs/underscore')
-			  , uniqueResults = _.uniq(_.pluck(divisions, 'division')); //todo: super lame but mongoose distinct just didnt work, why?
-			
+		Category.find({}, 'division', function (e, divisions){
+			var uniqueResults = _.uniq(_.pluck(divisions, 'division')); //todo: super lame but mongoose distinct just didnt work, why?			
 			callback(uniqueResults);
 		});
 	};
 	
-	getCategory = function(id, callback) {
+	getAllLeagues = function(callback) {
+		Category.find({}, 'league', function(e, leagues) {
+			var uniqueResults = _.uniq(_.pluck(leagues, 'league'));
+			callback(uniqueResults);
+		});
+	};
+	
+	getCategoryById = function(id, callback) {
 		Category.findOne({ _id: id }, function(err, category) {
+			callback(category);
+		});
+	};
+	
+	getCategoryByRoute = function(route, callback) {
+		Category.findOne({ route: route }, function(err, category) {
 			callback(category);
 		});
 	};
@@ -88,7 +105,7 @@ exports.category = (function() {
 	};
 	
 	updateLatestGame = function(params, callback) {
-		getCategory(params.categoryId, function(category) {
+		getCategoryById(params.categoryId, function(category) {
 			
 			if (!!category && category.latestGame.played < params.game.played) {
 				category.latestGame = params.game;
@@ -111,7 +128,7 @@ exports.category = (function() {
 		return _.pluck(teams, 'abbr').join('');
 	}
 	
-	eventEmitter.on('updateLatestGameForCategory', function(params){
+	eventEmitter.on('updateLatestGameForCategory', function(params) {
 		updateLatestGame(params, params.callback);
 	});
 	
@@ -124,8 +141,11 @@ exports.category = (function() {
 	  ,	addTeamToCategory: addTeamToCategory
 	  , checkLatestGame: checkLatestGame
 	  ,	establishDatabaseConnection: establishDatabaseConnection
+	  , getAllCategories: getAllCategories
 	  , getAllDivisions: getAllDivisions
-	  ,	getCategory: getCategory
+	  , getAllLeagues: getAllLeagues
+	  ,	getCategoryById: getCategoryById
+	  , getCategoryByRoute: getCategoryByRoute
 	  , getModel: getModel	
 	  , removeTeamFromCategory: removeTeamFromCategory
 	  , updateLatestGame: updateLatestGame

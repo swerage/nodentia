@@ -2,7 +2,7 @@ var bz = require('../business/nodentia')
   , formatter = require('../business/nodentia.formatter');
 
 exports.index = function(req, res) {
-	bz.getIndexViewModel(function(err, viewModel){
+	bz.getIndexViewModel(function(viewModel) {
 		res.render('index.html', { viewModel: viewModel });
 	});
 };
@@ -11,7 +11,7 @@ exports.show = function(req, res) {
 	var sport = req.params.sport,
 		division = req.params.division;
 	
-	bz.getShowViewModel(sport, division, function(err, game) {
+	bz.getShowViewModel(req.url, function(game) {
 
 		if (!game) {
 			res.redirect("back");
@@ -26,8 +26,8 @@ exports.show = function(req, res) {
 
 exports.admin = function(req, res) {
 	
-	bz.getAdminViewModel(function(err, data) {
-		res.render('admin.html', { viewData: data });
+	bz.getAdminViewModel(function(viewModel) {
+		res.render('admin.html', { viewData: viewModel });
 	});
 };
 
@@ -46,7 +46,7 @@ exports.editGame = function(req, res) {
 				res.render('_gameEditor.html', { viewData: data });			
 			} else {
 
-				bz.getGameById(req.query.id, function(game){
+				bz.getGame(req.query.id, function(game){
 					game.dateString = formatter.getDateString(new Date(game.played));
 					game.timeString = formatter.getTimeString(new Date(game.played));
 

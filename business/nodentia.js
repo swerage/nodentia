@@ -1,17 +1,14 @@
-var databaseUrl = 'nodentia_db'
-  , collections = ['teams', 'categories', 'games']
-  , db = require('mongojs').connect(databaseUrl, collections)
+var mongoose = require('mongoose')
   , formatter = require('../business/nodentia.formatter')
   , _ = require('../libs/underscore.js')
-  , mongoose = require('mongoose')
-  , conn = mongoose.createConnection('mongodb://localhost/nodentia_db')
+  , connection = mongoose.createConnection('mongodb://localhost/nodentia_db')
   , category = require('../models/category')['category']
   , game = require('../models/game')['game']
   , team = require('../models/team')['team'];
 
-game.establishDatabaseConnection(conn);
-team.establishDatabaseConnection(conn);
-category.establishDatabaseConnection(conn);
+game.establishDatabaseConnection(connection);
+team.establishDatabaseConnection(connection);
+category.establishDatabaseConnection(connection);
 
 exports.deleteTeamFromCategory = function(categoryId, teamId, callback) {
 	category.removeTeamFromCategory(function() {
@@ -20,67 +17,62 @@ exports.deleteTeamFromCategory = function(categoryId, teamId, callback) {
 };
 
 exports.getAdminViewModel = function(callback) {
-	var result = {};
+	var result;
 	
-	db.categories.find(function(err, categories){
-		result.categories = categories;
-		
-		team.getAll(function(teams) {
-			result.teams = teams;
-			
-			db.games.find(function(err, games){
-				result.games = games;
+	category.getAllCategories(function(categories) {
+		team.getAllTeams(function(teams) {
+			game.getAllGames(function(games) {
 				
-				callback(err, result);
-			})
+				result = {
+					categories: categories
+				  , teams: teams
+				  , games: games
+				};
+				
+				callback(result);
+			});
 		});
-	})
+	});
 };
 
 exports.getDivisions = function(callback) {
-	db.categories.distinct("division", function(err, divisions){
+	category.getAllDivisions(function(divisions) {
 		callback(divisions);
 	});
 };
 	
-exports.getGameById = function(id, callback) {
-	game.getGame(id, function(game){
+exports.getGame = function(id, callback) {
+	game.getGame(id, function(game) {
 		callback(game);
 	});
 };
 	
 exports.getIndexViewModel = function(callback) {
-	db.categories.find(function(err, categories) {
+	category.getAllCategories(function(categories) {
 		var viewModel = formatter.getCategoryViewModel(categories);						
-		callback(err, viewModel);
+		callback(viewModel);
 	});
 };
 	
 exports.getLeagues = function(callback) {
-	db.categories.distinct("league", function(err, leagues){			
+	category.getAllLeagues(function(leagues) {
 		callback(leagues);
 	});
 };
 	
-exports.getShowViewModel = function(sport, division, callback) {
-	var criteria = { "category.sport": sport, "category.division": division };
+exports.getShowViewModel = function(route, callback) {
 	
-	if (!criteria["category.division"]) {
-		criteria["category.division"] = 'herr';
-	}
-
-	db.games.find(criteria, function(err, games){
-		var game;
-		
-		if (!games[0]){
-			callback(err, null);
-		} else {
-			game = games[0];
-			game.styleClass = !!game.winner ? game.winner.toLowerCase() : game.home.toLowerCase() + game.away.toLowerCase();
-			game.title = game.winner;
-
-			callback(err, game);
-		}	
+	category.getCategoryByRoute(route, function(gameCategory) {
+		console.error(gameCategory);
+		game.getGame(gameCategory.latestGame._id, function(fetchedGame) {
+			if (!fetchedGame) {
+				callback(null);
+			} else {
+				fetchedGame.styleClass = !!fetchedGame.winner ? fetchedGame.winner.toLowerCase() : fetchedGame.home.toLowerCase() + fetchedGame.away.toLowerCase();
+				fetchedGame.title = game.winner.name;
+				callback(game);
+			}
+		});
 	});
 };
 	

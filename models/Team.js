@@ -1,5 +1,5 @@
 exports.team = (function() {
-	var addTeam, establishConnection, getAll, getModel, Team, mongoose, schema;
+	var addTeam, establishConnection, getAllTeams, getModel, Team, mongoose, schema;
 	
 	addTeam = function (doc, callback) {
 		var newTeam = new Team();
@@ -16,7 +16,7 @@ exports.team = (function() {
 		Team = connection.model('team', schema);
 	};
 	
-	getAll = function (callback) {
+	getAllTeams = function (callback) {
 		Team.find(function(e, teams) {
 			callback(teams);
 		});
@@ -29,7 +29,7 @@ exports.team = (function() {
 	return {
 		addTeam: addTeam
 	  ,	establishDatabaseConnection: establishDatabaseConnection
-	  ,	getAll: getAll
+	  ,	getAllTeams: getAllTeams
 	  ,	getModel: getModel
 	}
 }());

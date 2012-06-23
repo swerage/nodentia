@@ -19,7 +19,7 @@ describe("Teams", function() {
 			done();
 		});
 	});
-	
+		
 	it("adds a team", function(done) {
 		team.addTeam({ abbr: 'AIK', name: 'Allmänna Idrottsklubben'}, function(e){
 			var teamsModel = team.getModel();
@@ -33,13 +33,13 @@ describe("Teams", function() {
 	});
 	
 	it("lists all teams", function(done) {
-		team.getAll(function(teams) {
+		team.getAllTeams(function(teams) {
 			teams.length.should.not.equal(0);
 			done();
 		});
 	});
-
+	
 	it("rubs the lotion on its skin or else it gets the hose again", function (okayokay) {
 		okayokay();
-	})
+	});
 });
