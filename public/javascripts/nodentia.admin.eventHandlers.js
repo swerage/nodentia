@@ -41,16 +41,16 @@ window.nodentia.admin.eventHandlers = (function(){
 			var game, id;
 			
 			game = {
-				home: $("#home").val()
-			  ,	away: $("#away").val()
-			  ,	homeScore: !!$("#homeScore").val()
-			  ,	awayScore: !!$("#awayScore").val()
-			  ,	overtimeWin: !!$("#overtimeWin").is(':checked')
-			  ,	shootoutWin: !!$("#shootoutWin").is(':checked')
-			  ,	played: $("#play-date").val() + ' ' + $("#play-time").val()
-			  ,	season: $("#season").val()
-			  ,	category: $("#category").val()
-			  ,	arena: $("#arena").val()
+				home: $('#home').find('option:selected').data('team')
+			  ,	away: $('#away').find('option:selected').data('team')
+			  ,	homeScore: $('#homeScore').val()
+			  ,	awayScore: $('#awayScore').val()
+			  ,	overtimeWin: $('#overtimeWin').is(':checked') ? 1 : 0
+			  ,	shootoutWin: $('#shootoutWin').is(':checked') ? 1 : 0
+			  ,	played: $('#play-date').val() + ' ' + $("#play-time").val()
+			  ,	season: $('#season').val()
+			  ,	category: $('#category').val()
+			  ,	arena: $('#arena').val()
 			};
 			
 			id = $("#_id").val();			

@@ -11,7 +11,7 @@ exports.getCategoryViewModel = function(categories) {
 		model.sportProper = this.toProperCase(category.sport);
 		
 		if (!!category.latestGame.home) {
-			model.category.matchup = category.latestGame.home.toLowerCase() + category.latestGame.away.toLowerCase()
+			model.category.matchup = category.latestGame.home[0].abbr.toLowerCase() + category.latestGame.away[0].abbr.toLowerCase()
 		}
 		
 		if (category.starts > today) { 

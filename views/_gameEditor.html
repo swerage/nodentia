@@ -3,7 +3,7 @@
 <select id="home">
 	<option value="-1">Choose...</option>
 	{{each(i, team) viewData.teams}}
-	<option value="${team.abbr}" {{if viewData.game.home === team.abbr}} selected="selected"{{/if}}>${team.abbr}</option>
+	<option value="${team.abbr}" {{if !!viewData.game.home && viewData.game.home[0].abbr === team.abbr}} selected="selected"{{/if}} data-team="${JSON.stringify(team)}">${team.abbr}</option>
 	{{/each}}
 </select>
 <input type="text" id="homeScore" class="score" value="${viewData.game.homeScore}" />
@@ -12,7 +12,7 @@
 <select id="away">
 	<option value="-1">Choose...</option>
 	{{each(i, team) viewData.teams}}
-	<option value="${team.abbr}" {{if viewData.game.away === team.abbr}} selected="selected"{{/if}}>${team.abbr}</option>
+	<option value="${team.abbr}" {{if !!viewData.game.away && viewData.game.away[0].abbr === team.abbr}} selected="selected"{{/if}} data-team="${JSON.stringify(team)}">${team.abbr}</option>
 	{{/each}}
 </select>
 <input type="text" id="awayScore" class="score" value="${viewData.game.awayScore}" />

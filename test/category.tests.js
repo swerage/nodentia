@@ -13,11 +13,10 @@ describe("Category", function() {
 	category.establishDatabaseConnection(connection);
 	
 	beforeEach(function(done) {
-		game.addGame({ played: new Date('2012-03-01') }, function(newGame) {
-			team.addTeam({ abbr: 'T1', name: 'Team1'}, function(t1) {
-				team.addTeam({ abbr: 'T2', name: 'Team2'}, function(t2) {						
-						
-					category.addCategory({ sport: 'Ping Pong', league: 'Ping Pong League', division: 'Men', route: '/c/pingpong', teams: [t1, t2], starts: new Date('2012-01-01'), ends: new Date('2012-12-31'), latestGame: { _id: newGame._id, played: newGame.played } }, function(newCategory) {
+		team.addTeam({ abbr: 'T1', name: 'Team1'}, function(t1) {
+			team.addTeam({ abbr: 'T2', name: 'Team2'}, function(t2) {						
+				game.addGame({ home: t1, away: t2, played: new Date('2012-03-01'), homeScore: 2, awayScore: 1 }, function(newGame) {
+					category.addCategory({ sport: 'Ping Pong', league: 'Ping Pong League', division: 'Men', route: '/c/pingpong', teams: [t1, t2], starts: new Date('2012-01-01'), ends: new Date('2012-12-31'), latestGame: newGame }, function(newCategory) {
 						testCategory = newCategory;
 						done();	
 					});
@@ -173,7 +172,7 @@ describe("Category", function() {
 		});
 	});
 	
-	it('updates latestGame if the game is most recent when such an event is emitted', function(done) {
+	it('updates latestGame if an added game is more recent', function(done) {
 
 		game.getGame(testCategory.latestGame, function(initialGame) {
 			initialGame.played.should.equal(new Date('2012-03-01'));
@@ -185,6 +184,21 @@ describe("Category", function() {
 					done();
 				} });
 			});
+		});
+	});
+	
+	it('updates latestGame when the current latest game is edited', function(done) {
+		game.getGame(testCategory.latestGame, function(latestGame) { 
+			latestGame.homeScore.should.equal(2);
+			latestGame.winner[0].abbr.should.equal('T1');
+			
+			latestGame.homeScore = 0;
+			
+			eventEmitter.emit('updateLatestGameForCategory', { categoryId: testCategory._id, game: latestGame, callback: function(updatedCategory) {
+				updatedCategory.latestGame.homeScore.should.equal(0);
+				updatedCategory.latestGame.winner[0].abbr.should.equal('T2');
+				done();
+			}});
 		});
 	});
 	
