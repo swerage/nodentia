@@ -10,6 +10,12 @@ game.establishDatabaseConnection(connection);
 team.establishDatabaseConnection(connection);
 category.establishDatabaseConnection(connection);
 
+exports.deleteGame = function(gameId, callback) {
+	game.removeGame({ _id: gameId }, function() {
+		callback();
+	});
+};
+
 exports.deleteTeamFromCategory = function(categoryId, teamId, callback) {
 	category.removeTeamFromCategory(function() {
 		callback();
@@ -17,13 +23,12 @@ exports.deleteTeamFromCategory = function(categoryId, teamId, callback) {
 };
 
 exports.getAdminViewModel = function(callback) {
-	var result;
 	
 	category.getAllCategories(function(categories) {
 		team.getAllTeams(function(teams) {
 			game.getAllGames(function(games) {
 				
-				result = {
+				var result = {
 					categories: categories
 				  , teams: teams
 				  , games: games
@@ -31,6 +36,56 @@ exports.getAdminViewModel = function(callback) {
 				
 				callback(result);
 			});
+		});
+	});
+};
+
+exports.getEditCategoryViewModel = function(categoryId, callback) {
+
+	category.getAllSports(function(sports) {
+		category.getAllLeagues(function(leagues) {
+			category.getAllDivisions(function(divisions) {
+				
+				var vm = {
+					sports: sports
+				  , leagues: leagues
+				  , divisions: divisions
+				  , category: {}
+				};
+				
+				if (!!categoryId) {
+					category.getCategoryById(categoryId, function(fetchedCategory) {
+						vm.category = fetchedCategory;						
+						callback(vm);
+					});
+				} else {
+					callback(vm);
+				}
+			});
+		});
+	});
+};
+
+exports.getEditGameViewModel = function(gameId, callback) {
+	team.getAllTeams(function(teams) {
+		category.getAllCategories(function(categories) {		
+			var vm = {
+				teams: teams
+			  ,	categories: categories
+			  , game: {}
+			};
+			
+			if (!!gameId) {
+				game.getGame(gameId, function(gameToEdit) {
+					vm.dateString = formatter.getDateString(gameToEdit.played);
+					vm.timeString = formatter.getTimeString(gameToEdit.played);
+					vm.game = gameToEdit;
+					
+					callback(vm);
+				});
+			} else {
+				callback(vm);
+			}
 		});
 	});
 };
@@ -62,22 +117,23 @@ exports.getLeagues = function(callback) {
 	
 exports.getShowViewModel = function(route, callback) {
 	
-	category.getCategoryByRoute(route, function(gameCategory) {
-		console.error(gameCategory);
+	category.getCategoryByRoute(route, function(gameCategory) {	
 		game.getGame(gameCategory.latestGame._id, function(fetchedGame) {
 			if (!fetchedGame) {
 				callback(null);
-			} else {
-				fetchedGame.styleClass = !!fetchedGame.winner ? fetchedGame.winner.toLowerCase() : fetchedGame.home.toLowerCase() + fetchedGame.away.toLowerCase();
-				fetchedGame.title = game.winner.name;
-				callback(game);
+			} else {		
+				category.getCategoryById(fetchedGame.category, function(fetchedCategory) {
+					fetchedGame.styleClass = !!fetchedGame.winner[0] ? fetchedGame.winner[0].abbr.toLowerCase() : fetchedGame.home[0].abbr.toLowerCase() + fetchedGame.away[0].abbr.toLowerCase();
+					
+					callback(fetchedGame, fetchedCategory);
+				});
 			}
 		});
 	});
 };
 	
 exports.getCategories = function(callback) {
-	db.categories.find(function(err, categories){
+	category.getAllCategories(function(categories) {
 		callback(categories);
 	});
 };
@@ -89,108 +145,23 @@ exports.getCategory = function(id, callback) {
 };
 	
 exports.getSports = function(callback) {
-	db.categories.distinct("sport", function(err, sports){
+	category.getAllSports(function(sports) {
 		callback(sports);
 	});
 };
 
 exports.getTeams = function(callback) {
-	team.getAll(function(teams){
+	team.getAllTeams(function(teams){
 		callback(teams);
 	});
 };
 
-exports.saveCategory = function(category, callback) {
-	var id;
-	
-	category.latestGame = category.latestGame || {};
-	category.matchup = _.map(category.teams, function(el) { return el.abbr.toLowerCase(); }).join(''); 
-	
-	if (!!category._id) {
-		id = category._id;
-		delete category._id;
-		
-		db.categories.update({_id: db.ObjectId(id) }, { $set : category }, function(err) {
-			callback(!err);
-		});
-	} else {
-		db.categories.insert(category, function(err) {
-			callback(!err);
-		});
-	}
+exports.saveCategory = function(editedCategory, callback) {
+	category.saveCategory(editedCategory, function() { });
 };
 	
-exports.saveGame = function(game, callback) {
-	var result;
-
-	if (game.homeScore !== game.awayScore) {
-		game.winner = game.homeScore > game.awayScore ? game.home : game.away;
-	} else {
-		game.winner = '';
-	}
-	
-	if (+game.categoryId !== -1) {
-		exports.getCategory(game.categoryId, function(category) {
-			game.category = category;
-			saveGameInDB(game, callback);
-		});
-	} else {
-		saveGameInDB(game, callback);
-	}
+exports.saveGame = function(gameToSave, callback) {
+	game.saveGame(gameToSave, function() { 
+		callback();
+	});
 };
-
-function saveGameInDB(game, callback) {
-	var data;
-	
-	data = {
-	    home: game.home
-	  , away: game.away
-	  , homeScore: game.homeScore
-	  , awayScore: game.awayScore
-	  , winner: game.winner
-	  , overtimeWin: (+game.overtimeWin === 1)
-	  , shootoutWin: (+game.shootoutWin === 1)
-	  , played: game.played
-	  , season: game.season
-	  , category: game.category
-	  , arena: game.arena					
-	};
-	
-	if (!!game._id) {
-		db.games.update({ _id:  db.ObjectId(game._id) }, { $set : data }, { upsert: true }, function(err) { 
-			saveGameCallback(err, data, callback); 
-		});
-	} else {
-		db.games.insert(data, function(err) { 
-			saveGameCallback(err, data, callback);
-		});
-	}
-}
-
-function saveGameCallback(err, data, callback) {
-	if (!err) {
-		
-		exports.getCategory(data.category._id.toString(), function(category) {
-			var dirty = false
-			  , categoryId;
-							
-			if (!category.latestGame.played || category.latestGame.played < data.played) {
-				category.latestGame = data;
-				dirty = true;
-			}
-			
-			if (!category.starts || category.starts > data.played) {
-				category.starts = data.played;
-				dirty = true;
-			} 
-			
-			if (dirty) {
-				categoryId = category._id.toString()
-				delete category._id;
-				
-				db.categories.update({ _id: db.ObjectId(categoryId) }, { $set: category });
-			}
-		});
-	}
-	callback(!err);
-}

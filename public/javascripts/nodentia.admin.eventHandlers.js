@@ -9,7 +9,7 @@ window.nodentia.admin.eventHandlers = (function(){
 	
 	bind = function(){
 		
-		$(document).on("change", "#games", function() {
+		$(document).on('change', '#games', function() {
 			var id = $("#games").val();
 			
 			if (+id === -1) {
@@ -19,7 +19,7 @@ window.nodentia.admin.eventHandlers = (function(){
 			nodentia.admin.renderGameEditor(id);
 		});
 		
-		$(document).on("change", "#categories", function() {
+		$(document).on('change', '#categories', function() {
 			var id = $("#categories").val();
 			
 			if (+id === -1) {
@@ -29,28 +29,28 @@ window.nodentia.admin.eventHandlers = (function(){
 			nodentia.admin.renderCategoryEditor(id);
 		});
 		
-		$(document).on("click", "#newGame", function() {
+		$(document).on('click', '#newGame', function() {
 			nodentia.admin.renderGameEditor();
 		});
 		
-		$(document).on("click", "#newCategory", function() {
+		$(document).on('click', '#newCategory', function() {
 			nodentia.admin.renderCategoryEditor();
 		})
 		
-		$(document).on("click", "#saveGame", function() {
+		$(document).on('click', '#saveGame', function() {
 			var game, id;
 			
 			game = {
-				home: $("#home").val(),
-				away: $("#away").val(),
-				homeScore: $("#homeScore").val(),
-				awayScore: $("#awayScore").val(),
-				overtimeWin: $("#overtimeWin").is(':checked') ? $("#overtimeWin").val() : null,
-				shootoutWin: $("#shootoutWin").is(':checked') ? $("#shootoutWin").val() : null,
-				played: $("#play-date").val() + ' ' + $("#play-time").val(),
-				season: $("#season").val(),
-				categoryId: $("#category").val(),
-				arena: $("#arena").val()
+				home: $("#home").val()
+			  ,	away: $("#away").val()
+			  ,	homeScore: !!$("#homeScore").val()
+			  ,	awayScore: !!$("#awayScore").val()
+			  ,	overtimeWin: !!$("#overtimeWin").is(':checked')
+			  ,	shootoutWin: !!$("#shootoutWin").is(':checked')
+			  ,	played: $("#play-date").val() + ' ' + $("#play-time").val()
+			  ,	season: $("#season").val()
+			  ,	category: $("#category").val()
+			  ,	arena: $("#arena").val()
 			};
 			
 			id = $("#_id").val();			
@@ -61,7 +61,15 @@ window.nodentia.admin.eventHandlers = (function(){
 			nodentia.admin.saveGame(game);
 		});
 		
-		$(document).on("click", "#saveCategory", function(){
+		$(document).on('click', '#removeGame', function() {
+			var id = $("#_id").val();			
+			
+			nodentia.admin.removeGame(id, function() {
+				$("#edit-area").slideUp();
+			});
+		});
+		
+		$(document).on('click', '#saveCategory', function() {
 			var category, id;
 			
 			category = {
@@ -81,11 +89,11 @@ window.nodentia.admin.eventHandlers = (function(){
 			nodentia.admin.saveCategory(category);
 		});
 		
-		$(document).on("click", "#addTeam", function() {
+		$(document).on('click', '#addTeam', function() {
 			nodentia.admin.renderTeamRowWithTeams(settings.teams);
 		});
 		
-		$(document).on("click", ".remove-team", function() {
+		$(document).on('click', '.remove-team', function() {
 			var categoryId = $("#_id").val(),
 				teamId = $(this).data("team-_id");
 			
@@ -96,17 +104,17 @@ window.nodentia.admin.eventHandlers = (function(){
 			});
 		});
 		
-		$(document).on("click", "#new-sport", function(e) {
+		$(document).on('click', '#new-sport', function(e) {
 			$(this).prev().replaceWith('<input id="sport" type="text" />').end().remove();
 			e.preventDefault();
 		});
 		
-		$(document).on("click", "#new-league", function(e) {
+		$(document).on('click', '#new-league', function(e) {
 			$(this).prev().replaceWith('<input id="league" type="text" />').end().remove();
 			e.preventDefault();
 		});
 		
-		$(document).on("click", "#new-division", function(e) {
+		$(document).on('click', '#new-division', function(e) {
 			$(this).prev().replaceWith('<input id="division" type="text" />').end().remove();
 			e.preventDefault();
 		});

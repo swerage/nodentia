@@ -21,8 +21,8 @@
 <div><input type="checkbox" id="shootoutWin" {{if viewData.game.shootoutWin}} checked="checked" {{/if}} value="1" />Shootout win</div>
 
 <div>Played </div>
-<input type="text" id="play-date" class="date-picker" value="${viewData.game.dateString}" />
-<input type="text" id="play-time" value="${viewData.game.timeString}" />
+<input type="text" id="play-date" class="date-picker" value="${viewData.dateString}" />
+<input type="text" id="play-time" value="${viewData.timeString}" />
 
 <div>Season</div>
 <input type="text" id="season" value="${viewData.game.season}" />
@@ -32,7 +32,7 @@
 	<option value="-1">Choose...</option>
 	{{each(i, category) viewData.categories}}
 	<option value="${category._id}" 
-	{{if !!viewData.game.category && viewData.game.category._id.toString() === category._id.toString()}}selected="selected"{{/if}}>
+	{{if !!viewData.game.category && viewData.game.category.toString() === category._id.toString()}}selected="selected"{{/if}}>
 		${category.sport} - ${category.league} - ${category.division}
 	</option>
 	{{/each}}
@@ -43,5 +43,6 @@
 
 <div class="right">
 	<input type="button" id="saveGame" value="Save" />
+	<input type="button" id="removeGame" value="Remove" />
 	<input type="hidden" id="_id" value="${viewData.game._id}">
 </div>

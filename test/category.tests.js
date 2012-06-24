@@ -51,6 +51,19 @@ describe("Category", function() {
 		done();
 	});
 	
+	it('can edit a category', function(done) {
+		var id = testCategory._id;
+		
+		testCategory.sport.should.equal('Ping Pong');
+		testCategory.sport = 'Table Tennis';
+		
+		category.saveCategory(testCategory, function(savedCategory) {
+			savedCategory.sport.should.equal('Table Tennis');
+			savedCategory._id.toString().should.equal(id.toString());
+			done();
+		});
+	});
+	
 	it('can get a category by id', function(done) {
 		category.getCategoryById(testCategory._id, function(fetchedCategory){
 			fetchedCategory.should.not.be.null;
@@ -93,6 +106,14 @@ describe("Category", function() {
 		});
 	});
 	
+	it('can get all sports', function(done) {
+		category.getAllSports(function(sports) {
+			sports.length.should.not.equal(0);
+			sports.should.include('Ping Pong');
+			done();
+		});
+	});
+	
 	it('can add a team', function(done) {
 		
 		team.addTeam({ abbr: 'T3', name: 'Team3'}, function(t3) {
@@ -114,7 +135,20 @@ describe("Category", function() {
 			done();
 		});
 	});
-
+	
+	it('adds a new category when it is saved but doesnt exist', function(done) {
+		var newCategory = new category.getModel();
+		newCategory.sport = 'Table Tennis';
+		
+		newCategory.should.not.have.property('_id');
+		
+		category.saveCategory(newCategory, function(savedCategory) {
+			savedCategory._id.should.exist;
+			savedCategory.sport.should.equal('Table Tennis');
+			done();
+		});
+	});
+	
 	it('updates matchup when a team is added', function (done) {
 		testCategory.matchup.should.equal('T1T2');
 		

@@ -1,14 +1,20 @@
 window.nodentia = window.nodentia || {};
 
 nodentia.admin = (function() {
-	var init, removeTeam, renderGameEditor, renderCategoryEditor, saveCategory, saveGame;
+	var init, removeGame, removeTeam, renderGameEditor, renderCategoryEditor, saveCategory, saveGame;
 	
 	init = function() {
 		nodentia.admin.eventHandlers.bind();
 	};
 	
+	removeGame = function(id, callback) {
+		$.post('/admin/game/delete', { id: id }, function() {
+			callback();
+		});
+	};
+	
 	removeTeam = function(categoryId, teamAbbr, callback) {
-		$.post("/admin/teamrow/delete", { categoryId: categoryId, teamAbbr: teamAbbr }, function(response) {
+		$.post('/admin/teamrow/delete', { categoryId: categoryId, teamAbbr: teamAbbr }, function(response) {
 			callback(response.ok);
 		});
 	};
@@ -46,12 +52,13 @@ nodentia.admin = (function() {
 	};
 	
 	return {
-		init: init,
-		removeTeam: removeTeam,
-		renderGameEditor: renderGameEditor,
-		renderCategoryEditor: renderCategoryEditor,
-		renderTeamRowWithTeams: renderTeamRowWithTeams,
-		saveCategory: saveCategory,
-		saveGame: saveGame
+		init: init
+	  , removeGame: removeGame	
+	  ,	removeTeam: removeTeam
+	  ,	renderGameEditor: renderGameEditor
+	  ,	renderCategoryEditor: renderCategoryEditor
+	  ,	renderTeamRowWithTeams: renderTeamRowWithTeams
+	  ,	saveCategory: saveCategory
+	  ,	saveGame: saveGame
 	}
 }());

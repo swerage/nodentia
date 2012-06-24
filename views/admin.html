@@ -15,7 +15,7 @@
 		<select id="games" name="games" class="admin-select">
 			<option value="-1">Choose...</option>
 			{{each(i, game) viewData.games}}
-			<option value="${game._id}">${game.home} - ${game.away}</option>
+			<option value="${game._id}">${game.home[0].abbr} - ${game.away[0].abbr}</option>
 			{{/each}}
 		</select>
 	</section>	

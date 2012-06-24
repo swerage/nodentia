@@ -17,8 +17,8 @@
 <select id="sport">
 	<option value="-1">Choose...</option>
 	{{each(i, sport) viewData.sports}}
-	<option value="${sport.name}" {{if viewData.category.sport == sport.name}} selected="selected"{{/if}} data-proper="${sport.proper}">
-		${sport.name}
+	<option value="${sport}" {{if viewData.category.sport == sport}} selected="selected"{{/if}}">
+		${sport}
 	</option>
 	{{/each}}
 </select>

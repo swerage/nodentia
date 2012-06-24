@@ -21,9 +21,11 @@ exports.game = (function() {
 		
 		if (+game.homeScore !== +game.awayScore) {
 			game.winner = game.homeScore > game.awayScore ? game.home : game.away;
+		} else {
+			game.winner = [];
 		}
 		
-		saveGame(game, callback);
+		saveGameAndEmitEvent(game, callback);
 	};
 	
 	establishDatabaseConnection = function(connection) {
@@ -48,7 +50,6 @@ exports.game = (function() {
 	}
 	
 	removeGame = function(game, callback) {
-
 		Game.find({ _id: game._id }).remove(function() {
 			eventEmitter.emit('gameWasRemoved', game._id);
 			callback();
@@ -56,22 +57,45 @@ exports.game = (function() {
 	};
 	
 	saveGame = function(game, callback) {
-		if (+game.homeScore !== +game.awayScore) {
-			game.winner = game.homeScore > game.awayScore ? game.home : game.away;
-		} else {
-			game.winner = [];
-		}
-		
+		getGame(game._id, function(existingGame) {
+			if (!!existingGame) {
+				existingGame.home 		 = game.home;
+				existingGame.away 		 = game.away;
+				existingGame.homeScore 	 = game.homeScore;
+				existingGame.awayScore 	 = game.awayScore;
+				existingGame.overtimeWin = game.overtimeWin;
+				existingGame.shootoutWin = game.shootoutWin;
+				existingGame.played 	 = game.played;
+				existingGame.season 	 = game.season;
+				existingGame.category 	 = game.category;
+				existingGame.arena 	 	 = game.arena;
+				
+				if (+existingGame.homeScore !== +existingGame.awayScore) {
+					existingGame.winner = existingGame.homeScore > existingGame.awayScore ? existingGame.home : existingGame.away;
+				} else {
+					existingGame.winner = [];
+				}
+				
+				saveGameAndEmitEvent(existingGame, callback);
+				
+			} else {
+				addGame(game, callback);
+			}
+		});
+	};
+	
+	function saveGameAndEmitEvent(game, callback) {
 		game.save(function(e, savedGame) {
 			getAllGames(function(games) {
 				var mostRecentGame = _.max(games, function(current) { return current.played; })
 				  , categoryId = savedGame.category;
 				
-				eventEmitter.emit('updateLatestGameForCategory', { categoryId: categoryId, game: mostRecentGame });
-				callback(savedGame);
+				eventEmitter.emit('updateLatestGameForCategory', { categoryId: categoryId, game: mostRecentGame, callback: function() {
+					callback(savedGame);
+				}});
 			});
 		});
-	};
+	}
 	
 	return {
 	  	addGame: addGame

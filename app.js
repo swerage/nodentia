@@ -54,6 +54,7 @@ app.get('/about', routes.about);
 //Routes - Commands
 
 app.post('/admin/game/save', routes.saveGame);
+app.post('/admin/game/delete', routes.deleteGame);
 app.post('/admin/category/save', routes.saveCategory);
 app.post('/admin/season/save', routes.saveSeason);
 app.post('/admin/teamrow/delete', routes.deleteTeamRow);

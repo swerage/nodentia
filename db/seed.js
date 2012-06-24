@@ -39,8 +39,7 @@
 	}
 	
 	function addGames() {
-		game.getModel().remove({}, function() {
-			
+		game.getModel().remove({}, function() {			
 			game.addGame({ home: createdTeams[0], away: createdTeams[1], homeScore: 10, awayScore: 0, overtimeWin: false, shootoutWin: false, played: new Date(), season: new Date().getFullYear(), category: createdCategory, arena: 'Råsunda' }, function() {
 				process.exit(1);	
 			});

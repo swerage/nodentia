@@ -11,13 +11,13 @@ exports.show = function(req, res) {
 	var sport = req.params.sport,
 		division = req.params.division;
 	
-	bz.getShowViewModel(req.url, function(game) {
+	bz.getShowViewModel(req.url, function(game, category) {
 
 		if (!game) {
 			res.redirect("back");
 		} else {
-			game.category.sport = formatter.toProperCase(game.category.sport);
-			game.category.division = formatter.toProperCase(game.category.division);
+			game.category.sport = formatter.toProperCase(category.sport);
+			game.category.division = formatter.toProperCase(category.division);
 			
 			res.render('show.html', game);
 		}
@@ -32,64 +32,14 @@ exports.admin = function(req, res) {
 };
 
 exports.editGame = function(req, res) {
-	var data = {};
-	
-	bz.getTeams(function(teams){
-		data.teams = teams;
-		
-		bz.getCategories(function(categories){
-			data.categories = categories;
-			
-			if (!req.query.id) {
-				data.game = {};				
-				
-				res.render('_gameEditor.html', { viewData: data });			
-			} else {
-
-				bz.getGame(req.query.id, function(game){
-					game.dateString = formatter.getDateString(new Date(game.played));
-					game.timeString = formatter.getTimeString(new Date(game.played));
-
-					data.game = game;
-					
-					res.render('_gameEditor.html', { viewData: data });
-				});
-			}
-		});
+	bz.getEditGameViewModel(req.query.id, function(viewModel) {
+		res.render('_gameEditor.html', { viewData: viewModel });
 	});
 };
 
 exports.editCategory = function(req, res) {
-	var data = {}
-	  , i;
-	
-	bz.getSports(function(sports){
-		data.sports = [];
-		
-		for (i in sports) {
-			data.sports.push({ name: sports[i], proper: formatter.toProperCase(sports[i]) });
-		}
-		
-		bz.getLeagues(function(leagues) {
-			data.leagues = leagues;
-			
-			bz.getDivisions(function(divisions) {
-				data.divisions = divisions;
-				
-				if (!req.query.id) {
-					data.category = {};
-					
-					res.render("_categoryEditor.html", { viewData: data });
-				} else {
-					
-					bz.getCategory(req.query.id, function(category) {
-						data.category = category;
-						
-						res.render("_categoryEditor.html", { viewData: data });
-					});
-				}
-			});
-		});
+	bz.getEditCategoryViewModel(req.query.id, function(viewModel) {
+		res.render("_categoryEditor.html", { viewData: viewModel });
 	});
 };
 
@@ -109,6 +59,12 @@ exports.saveCategory = function(req, res) {
 exports.addTeamRow = function(req, res) {
 	bz.getTeams(function(teams){
 		res.render('_teamRow.html', { teams: teams, selectedTeam: '' });
+	});
+};
+
+exports.deleteGame = function(req, res) {
+	bz.deleteGame(req.body.id, function(status) {
+		res.send({ ok: status });
 	});
 };
 
