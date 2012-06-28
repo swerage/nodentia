@@ -19,8 +19,8 @@ exports.schemas = (function() {
 	  ,	matchup: String
 	  ,	starts: Date
 	  ,	ends: Date
-	  ,	latestGame: { _id: ObjectId, played: Date, homeScore: Number, awayScore: Number, home: [Team], away: [Team], winner: [Team] }
-	});
+	  ,	latestGame:  { type: ObjectId, ref: 'Game' }
+	}); 
 	
 	Game = new mongoose.Schema({
 	    home: [Team]

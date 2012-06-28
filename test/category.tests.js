@@ -8,17 +8,23 @@ describe("Category", function() {
 	  , team = require('../models/team')['team']
 	  , eventHandling = require('../business/eventHandling')['eventHandling']
 	  , eventEmitter = eventHandling.getEventEmitter()
-	  , testCategory;
+	  , testCategory
+	  , testGame;
 	
 	category.establishDatabaseConnection(connection);
 	
 	beforeEach(function(done) {
 		team.addTeam({ abbr: 'T1', name: 'Team1'}, function(t1) {
-			team.addTeam({ abbr: 'T2', name: 'Team2'}, function(t2) {						
-				game.addGame({ home: t1, away: t2, played: new Date('2012-03-01'), homeScore: 2, awayScore: 1 }, function(newGame) {
-					category.addCategory({ sport: 'Ping Pong', league: 'Ping Pong League', division: 'Men', route: '/c/pingpong', teams: [t1, t2], starts: new Date('2012-01-01'), ends: new Date('2012-12-31'), latestGame: newGame }, function(newCategory) {
+			team.addTeam({ abbr: 'T2', name: 'Team2'}, function(t2) {															
+				category.addCategory({ sport: 'Ping Pong', league: 'Ping Pong League', division: 'Men', route: '/c/pingpong', teams: [t1, t2], starts: new Date('2012-01-01'), ends: new Date('2012-12-31') }, function(newCategory) {
+					game.addGame({ home: t1, away: t2, played: new Date('2012-03-01'), homeScore: 2, awayScore: 1, category: newCategory }, function(newGame) {						
+						testGame = newGame;
 						testCategory = newCategory;
-						done();	
+						testCategory.latestGame = newGame;
+						
+						category.saveCategory(testCategory, function() {							
+							done();	
+						});
 					});
 				});
 			});
@@ -27,13 +33,16 @@ describe("Category", function() {
 	
 	afterEach(function(done) {
 		var teamModel = team.getModel()
-		  ,	categoryModel = category.getModel(); 
+		  ,	categoryModel = category.getModel()
+		  , gameModel = game.getModel(); 
 		
 		testCategory = {};
 		
 		categoryModel.remove({}, function() {			
 			teamModel.remove({}, function() {
-				done();
+				gameModel.remove({}, function() {
+					done();	
+				});
 			});
 		});
 	});
@@ -177,9 +186,11 @@ describe("Category", function() {
 		game.getGame(testCategory.latestGame, function(initialGame) {
 			initialGame.played.should.equal(new Date('2012-03-01'));
 			
-			game.addGame({ played: new Date('2012-03-05') }, function(newGame) {
-				eventEmitter.emit('updateLatestGameForCategory', { categoryId: testCategory._id, game: newGame, callback: function(updatedCategory) {
-					updatedCategory.latestGame._id.should.equal(newGame._id);
+			testGame.played = new Date('2012-03-06');
+			
+			game.addGame(testGame, function(newGame) {
+				eventEmitter.emit('updateLatestGame', { game: newGame, callback: function(updatedCategory) {
+					updatedCategory.latestGame._id.toString().should.equal(newGame._id.toString());
 					updatedCategory.latestGame.played.should.equal(newGame.played);
 					done();
 				} });
@@ -194,7 +205,7 @@ describe("Category", function() {
 			
 			latestGame.homeScore = 0;
 			
-			eventEmitter.emit('updateLatestGameForCategory', { categoryId: testCategory._id, game: latestGame, callback: function(updatedCategory) {
+			eventEmitter.emit('updateLatestGame', { game: latestGame, callback: function(updatedCategory) {
 				updatedCategory.latestGame.homeScore.should.equal(0);
 				updatedCategory.latestGame.winner[0].abbr.should.equal('T2');
 				done();
@@ -206,10 +217,12 @@ describe("Category", function() {
 		game.getGame(testCategory.latestGame, function(initialGame) {
 			initialGame.played.should.equal(new Date('2012-03-01'));
 			
-			game.addGame({ played: new Date('2012-02-28') }, function(newGame) {
-				eventEmitter.emit('updateLatestGameForCategory', { categoryId: testCategory._id, game: newGame, callback: function(updatedCategory) {
-					updatedCategory.latestGame._id.should.not.equal(newGame._id);
-					updatedCategory.latestGame.played.should.equal(initialGame.played);
+			initialGame.played = new Date('2012-02-28');
+			
+			game.addGame(initialGame, function(newGame) {
+				eventEmitter.emit('updateLatestGame', { game: newGame, callback: function(updatedCategory) {
+					updatedCategory.latestGame.should.not.equal(newGame._id);					
+					updatedCategory.latestGame.played.should.equal(new Date('2012-03-01'));
 					done();
 				}});
 			});
@@ -217,10 +230,10 @@ describe("Category", function() {
 	});
 	
 	it('clears latestGame when such an event is emitted', function (done) {
-		testCategory.latestGame.should.not.be.null;
+		testCategory.latestGame.should.not.be.null;	
 		
-		eventEmitter.emit('gameWasRemoved', { gameId: testCategory.latestGame._id, callback: function(returnedCategory) {
-			returnedCategory.latestGame.should.be.null;	
+		eventEmitter.emit('gameWasRemoved', { gameId: testCategory.latestGame, callback: function(returnedCategory) {
+			returnedCategory.should.have.property('latestGame', null);	
 			done();
 		}});
 	});

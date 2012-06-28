@@ -1,6 +1,6 @@
 exports.category = (function() {
 	var addCategory, addTeamToCategory, Category, checkLatestGame, establishDatabaseConnection, eventEmitter, eventHandling, 
-	getAllCategories, getAllDivisions, getAllLeagues, getAllSports, getCategoryById, getCategoryByRoute, getModel, mongoose, 
+	getAllCategories, getAllDivisions, getAllLeagues, getAllSports, getCategoryById, getCategoryByRoute, getModel, 
 	removeTeamFromCategory, saveCategory, updateLatestGame, _;
 	
 	eventHandling = require('../business/eventHandling')['eventHandling'];
@@ -36,13 +36,13 @@ exports.category = (function() {
 	};
 	
 	checkLatestGame = function(gameId, callback) {
-		Category.findOne({ 'latestGame._id': gameId }, function (e, category) {
-			
+		Category.findOne({ 'latestGame': gameId }, function (e, category) {
+
 			if (!!category && !!category.save) {
 				category.latestGame = null;
-				category.save(function(e, savedCategory) {
+				
+				saveCategory(category, function(savedCategory) {
 					eventEmitter.emit('latestGameWasClearedForCategory', savedCategory._id);
-					
 					if (!!callback) {
 						callback(savedCategory);
 					}
@@ -56,12 +56,17 @@ exports.category = (function() {
 	};
 	
 	establishDatabaseConnection = function(connection) {
-		var schema = require('../db/schemas')["schemas"].categorySchema;
-		Category = connection.model('category', schema);
+		var mongoose = require('mongoose')
+		  , schemas = require('../db/schemas')["schemas"]
+		  , categorySchema = schemas.categorySchema
+		  , gameSchema = schemas.gameSchema;
+		
+		Category = connection.model('Category', categorySchema);
+		mongoose.model('Game', gameSchema);
 	};
 	
 	getAllCategories = function(callback) {
-		Category.find({}, function(err, categories) {
+		Category.find({}).populate('latestGame').exec(function(err, categories) {
 			callback(categories);
 		});
 	};
@@ -88,13 +93,13 @@ exports.category = (function() {
 	};
 	
 	getCategoryById = function(id, callback) {
-		Category.findOne({ _id: id }, function(err, category) {
+		Category.findOne({ _id: id }).populate('latestGame').exec(function(err, category) {
 			callback(category);
 		});
 	};
 	
 	getCategoryByRoute = function(route, callback) {
-		Category.findOne({ route: route }, function(err, category) {
+		Category.findOne({ route: route }).populate('latestGame').exec(function(err, category) {
 			callback(category);
 		});
 	};
@@ -113,7 +118,7 @@ exports.category = (function() {
 	};
 	
 	saveCategory = function(category, callback) {
-		
+
 		getCategoryById(category._id, function(existingCategory) {	
 			if (!!existingCategory) {
 				existingCategory.sport 		= category.sport; 
@@ -137,51 +142,55 @@ exports.category = (function() {
 	};
 	
 	updateLatestGame = function(params, callback) {
-		
-		getCategoryById(params.categoryId, function(category) {
-			var savedGameIsLatestGame = !!category && !!category.latestGame && category.latestGame._id && category.latestGame._id.toString() === params.game._id.toString()
-			  , savedGameIsNewerThanCurrentLatestGame =  !!category && (!category.latestGame.played || category.latestGame.played < params.game.played);
-			
-			if (savedGameIsLatestGame) {
-				category.latestGame.played 		= params.game.played;
-				category.latestGame.homeScore 	= params.game.homeScore;
-				category.latestGame.awayScore 	= params.game.awayScore;
+
+		if (!!params.game) {			
+			getCategoryById(params.game.category, function(category) {
+				var savedGameIsLatestGame = !!category && !!category.latestGame && !!category.latestGame._id && category.latestGame._id.toString() === params.game._id.toString()
+				  , savedGameIsNewerThanCurrentLatestGame =  !!category && (!category.latestGame || category.latestGame.played < params.game.played);
 				
-				if (+category.latestGame.homeScore !== +category.latestGame.awayScore) {
-					category.latestGame.winner = category.latestGame.homeScore > category.latestGame.awayScore ? category.latestGame.home : category.latestGame.away;
-				} else {
-					category.latestGame.winner = [];
-				}
-				
-				category.save(function(e, updatedCategory) {
-					if (!!callback) {
-						callback(updatedCategory);
+				if (savedGameIsLatestGame) {
+					category.latestGame.played 		= params.game.played;
+					category.latestGame.homeScore 	= params.game.homeScore;
+					category.latestGame.awayScore 	= params.game.awayScore;
+
+					if (+category.latestGame.homeScore !== +category.latestGame.awayScore) {
+						category.latestGame.winner = category.latestGame.homeScore > category.latestGame.awayScore ? category.latestGame.home : category.latestGame.away;
+					} else {
+						category.latestGame.winner = [];
 					}
-				});				
-			} else if (savedGameIsNewerThanCurrentLatestGame) {
-					category.latestGame = params.game;
 
 					category.save(function(e, updatedCategory) {
 						if (!!callback) {
 							callback(updatedCategory);
 						}
 					});
-			} else {
-				if (!!callback) {
-					callback(category);
-				}	
+				} else if (savedGameIsNewerThanCurrentLatestGame) {
+					category.latestGame = params.game;
+					
+					category.save(function(e, updatedCategory) {
+						if (!!callback) {
+							getCategoryById(updatedCategory._id, callback);
+						}
+					});
+				} else {
+					if (!!callback) {
+						callback(category);
+					}	
+				}
+			});
+		} else {
+			if (!!callback) {
+				callback();
 			}
-		});
+		}
 	};
 	
 	function getMatchupFromTeams(teams) {
 		return _.pluck(teams, 'abbr').join('');
 	}
 	
-	eventEmitter.on('updateLatestGameForCategory', function(params) {
-		getAllCategories(function(categories) {			
-			updateLatestGame(params, params.callback);
-		});
+	eventEmitter.on('updateLatestGame', function(params) {
+		updateLatestGame(params, params.callback);
 	});
 	
 	eventEmitter.on('gameWasRemoved', function(params) {

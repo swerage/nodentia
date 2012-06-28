@@ -13,10 +13,14 @@ describe('Games', function() {
 		team.addTeam({ abbr: 'T1', name: 'Team1'}, function(t1) {
 			team.addTeam({ abbr: 'T2', name: 'Team2' }, function(t2) {
 				category.addCategory({ sport: 'Kast med liten gubbe'}, function(cat) {
-					
-					game.addGame({ home: t1, away: t2, homeScore: 2, awayScore: 1, overtimeWin: false, shootoutWin: true, played: new Date('2012-01-01'), season: '2012', category: cat, arena: 'Buddy Arena' }, function(newGame) {								
-						testGame = newGame;
-						done();
+					category.addCategory({ sport: 'Other silly sport'}, function(cat2) {
+						game.addGame({ home: t1, away: t2, homeScore: 2, awayScore: 1, overtimeWin: false, shootoutWin: true, played: new Date('2012-01-01'), season: '2012', category: cat2, arena: 'Buddy Arena' }, function(newGame) {
+							
+							game.addGame({ home: t1, away: t2, homeScore: 2, awayScore: 1, overtimeWin: false, shootoutWin: true, played: new Date('2012-01-01'), season: '2012', category: cat, arena: 'Buddy Arena' }, function(newGame) {								
+								testGame = newGame;
+								done();
+							});
+						});
 					});
 				});
 			});
@@ -24,10 +28,18 @@ describe('Games', function() {
 	});
 	
 	afterEach(function(done) {
-		var gameModel = game.getModel();
+		var teamModel = team.getModel()
+		  ,	categoryModel = category.getModel()
+		  , gameModel = game.getModel(); 
 		
-		gameModel.remove({}, function() {
-			done();
+		testGame = {};
+		
+		categoryModel.remove({}, function() {			
+			teamModel.remove({}, function() {
+				gameModel.remove({}, function() {
+					done();	
+				});
+			});
 		});
 	});
 
@@ -75,15 +87,14 @@ describe('Games', function() {
 	it('removes a game', function(done) {
 		game.removeGame(testGame, function() {
 			game.getAllGames(function(games) {
-				games.length.should.equal(0);
+				games.length.should.equal(1);
 				done();
 			});
 		});
 	});
 
 	it('gets all games', function(done) {
-		game.addGame({ homeScore: 2, awayScore: 1, overtimeWin: false, shootoutWin: true, 
-			played: new Date('2012-01-01'), season: '2012', arena: 'Buddy Arena' }, function(newGame) {
+		game.addGame({ homeScore: 2, awayScore: 1, overtimeWin: false, shootoutWin: true, played: new Date('2012-01-01'), season: '2012', arena: 'Buddy Arena', category: testGame.category }, function(newGame) {
 				
 			game.getAllGames(function(games) {
 				games.length.should.be.above(1);
@@ -91,7 +102,15 @@ describe('Games', function() {
 			});
 		});
 	});
-
+	
+	it ('gets all games by category', function(done) {
+		game.getAllGamesByCategory(testGame.category, function(games) {
+			games.length.should.equal(1);
+			games[0].category._id.toString().should.equal(testGame.category.toString());
+			done();
+		});
+	});
+	
 	it('can have its properties updated', function(done) {
 		var testGameId = testGame._id
 		  ,	previousCategoryId = testGame.category;

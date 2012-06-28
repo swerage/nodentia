@@ -31,7 +31,7 @@
 	
 	function addCategories() {
 		category.getModel().remove({}, function() {
-			category.addCategory({ sport: 'fotboll', league: 'Allsvenskan', division: 'herr', route: '/g/fotboll', teams: createdTeams, matchup: 'aikdif', starts: '2012-05-08', ends: '2012-10-21', latestGame: {} }, function(savedCategory) {
+			category.addCategory({ sport: 'fotboll', league: 'Allsvenskan', division: 'herr', route: '/g/fotboll', teams: createdTeams, matchup: 'aikdif', starts: '2012-05-08', ends: '2012-10-21' }, function(savedCategory) {
 				createdCategory = savedCategory;
 				addGames();
 			});

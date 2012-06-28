@@ -10,7 +10,7 @@ exports.getCategoryViewModel = function(categories) {
 		model.division = category.division === 'dam' ? "- Dam" : category.division;
 		model.sportProper = this.toProperCase(category.sport);
 		
-		if (!!category.latestGame.home) {
+		if (!!category.latestGame && !!category.latestGame.home) {
 			model.category.matchup = category.latestGame.home[0].abbr.toLowerCase() + category.latestGame.away[0].abbr.toLowerCase()
 		}
 		
@@ -18,7 +18,7 @@ exports.getCategoryViewModel = function(categories) {
 			model.daysLeft = getDayOfYear(category.starts) - getDayOfYear(today);
 			model.overlay = model.daysLeft + " dagar kvar";
 		} else {
-			if (!!category.latestGame.homeScore) {
+			if (!!category.latestGame && !!category.latestGame.homeScore) {
 				model.highlight = category.latestGame.homeScore + "-" + category.latestGame.awayScore;
 				
 				if (category.latestGame.homeScore !== category.latestGame.awayScore) {

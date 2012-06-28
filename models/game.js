@@ -1,5 +1,5 @@
 exports.game = (function() {
-	var addGame, establishDatabaseConnection, eventEmitter, eventHandling, Game, getAllGames, getGame, mongoose, saveGame, schema, _;
+	var addGame, establishDatabaseConnection, eventEmitter, eventHandling, Game, getAllGames, getAllGamesByCategory, getGame, saveGame, _;
 	
 	eventHandling = require('../business/eventHandling')['eventHandling'];
 	eventEmitter = eventHandling.getEventEmitter();
@@ -29,12 +29,23 @@ exports.game = (function() {
 	};
 	
 	establishDatabaseConnection = function(connection) {
-		schema = require('../db/schemas')["schemas"].gameSchema;
-		Game = connection.model('game', schema);
+		var mongoose = require('mongoose')
+		  ,	schemas = require('../db/schemas')["schemas"]
+		  , gameSchema = schemas.gameSchema
+		  , categorySchema = schemas.categorySchema;
+		
+		Game = connection.model('game', gameSchema);
+		mongoose.model('Category', categorySchema);
 	};
 	
 	getAllGames = function(callback) {
 		Game.find({}, function(err, games) {
+			callback(games);
+		});
+	};
+	
+	getAllGamesByCategory = function(categoryId, callback) {
+		Game.find({ 'category': categoryId }).populate('category').exec(function(err, games) {
 			callback(games);
 		});
 	};
@@ -57,6 +68,7 @@ exports.game = (function() {
 	};
 	
 	saveGame = function(game, callback) {
+		
 		getGame(game._id, function(existingGame) {
 			if (!!existingGame) {
 				existingGame.home 		 = game.home;
@@ -86,13 +98,16 @@ exports.game = (function() {
 	
 	function saveGameAndEmitEvent(game, callback) {
 		game.save(function(e, savedGame) {
-			getAllGames(function(games) {
-				var mostRecentGame = _.max(games, function(current) { return current.played; })
-				  , categoryId = savedGame.category;
-				
-				eventEmitter.emit('updateLatestGameForCategory', { categoryId: categoryId, game: mostRecentGame, callback: function() {
+			getAllGamesByCategory(savedGame.category, function(games) {
+				var mostRecentGame = _.max(games, function(current) { return current.played; });
+
+				if (!!mostRecentGame) {
+					eventEmitter.emit('updateLatestGame', { game: mostRecentGame, callback: function() {
+						callback(savedGame);
+					}});
+				} else {
 					callback(savedGame);
-				}});
+				}
 			});
 		});
 	}
@@ -101,6 +116,7 @@ exports.game = (function() {
 	  	addGame: addGame
 	  ,	establishDatabaseConnection: establishDatabaseConnection
 	  , getAllGames: getAllGames
+	  , getAllGamesByCategory: getAllGamesByCategory
 	  ,	getGame: getGame
 	  , getModel: getModel
 	  , removeGame: removeGame
