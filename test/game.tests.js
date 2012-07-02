@@ -13,7 +13,7 @@ describe('Games', function() {
 		team.addTeam({ abbr: 'T1', name: 'Team1'}, function(t1) {
 			team.addTeam({ abbr: 'T2', name: 'Team2' }, function(t2) {
 				category.addCategory({ sport: 'Kast med liten gubbe'}, function(cat) {
-					category.addCategory({ sport: 'Other silly sport'}, function(cat2) {
+					category.addCategory({ sport: 'Other silly sport', teams: [t1, t2]}, function(cat2) {
 						game.addGame({ home: t1, away: t2, homeScore: 2, awayScore: 1, overtimeWin: false, shootoutWin: true, played: new Date('2012-01-01'), season: '2012', category: cat2, arena: 'Buddy Arena' }, function(newGame) {
 							
 							game.addGame({ home: t1, away: t2, homeScore: 2, awayScore: 1, overtimeWin: false, shootoutWin: true, played: new Date('2012-01-01'), season: '2012', category: cat, arena: 'Buddy Arena' }, function(newGame) {								
@@ -117,7 +117,7 @@ describe('Games', function() {
 		
 		team.addTeam({ abbr: 'T3', name: 'Team3'}, function(t3) {
 			team.addTeam({ abbr: 'T4', name: 'Team4' }, function(t4) {
-				category.addCategory({ sport: 'Quidditch' }, function(cat2) {
+				category.addCategory({ sport: 'Quidditch', teams: [t3, t4] }, function(cat2) {
 					
 					testGame.home = t3;
 					testGame.away = t4;

@@ -29,10 +29,10 @@ exports.game = (function() {
 	};
 	
 	establishDatabaseConnection = function(connection) {
-		var mongoose = require('mongoose')
-		  ,	schemas = require('../db/schemas')["schemas"]
-		  , gameSchema = schemas.gameSchema
-		  , categorySchema = schemas.categorySchema;
+		var mongoose               = require('mongoose')
+		  ,	schemas                = require('../db/schemas')["schemas"]
+		  , gameSchema             = schemas.gameSchema
+		  , categorySchema         = schemas.categorySchema;
 		
 		Game = connection.model('game', gameSchema);
 		mongoose.model('Category', categorySchema);
@@ -100,7 +100,7 @@ exports.game = (function() {
 		game.save(function(e, savedGame) {
 			getAllGamesByCategory(savedGame.category, function(games) {
 				var mostRecentGame = _.max(games, function(current) { return current.played; });
-
+				
 				if (!!mostRecentGame) {
 					eventEmitter.emit('updateLatestGame', { game: mostRecentGame, callback: function() {
 						callback(savedGame);

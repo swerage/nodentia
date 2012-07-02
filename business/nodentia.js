@@ -1,5 +1,5 @@
 var mongoose = require('mongoose')
-  , formatter = require('../business/nodentia.formatter')
+  , formatter = require('../business/formatter')
   , _ = require('../libs/underscore.js')
   , connection = mongoose.createConnection('mongodb://localhost/nodentia_db')
   , category = require('../models/category')['category']
@@ -157,7 +157,9 @@ exports.getTeams = function(callback) {
 };
 
 exports.saveCategory = function(editedCategory, callback) {
-	category.saveCategory(editedCategory, function() { });
+	category.saveCategory(editedCategory, function() { 
+		callback();
+	});
 };
 	
 exports.saveGame = function(gameToSave, callback) {

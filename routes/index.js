@@ -1,5 +1,5 @@
 var bz = require('../business/nodentia')
-  , formatter = require('../business/nodentia.formatter');
+  , formatter = require('../business/formatter');
 
 exports.index = function(req, res) {
 	bz.getIndexViewModel(function(viewModel) {

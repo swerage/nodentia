@@ -1,7 +1,7 @@
 exports.getCategoryViewModel = function(categories) {
-	var viewModel = [];
-	
-	for (var i = 0; i < categories.length; i++) {
+	var viewModel = [], i;
+	 
+	for (i = 0; i < categories.length; i++) {
 		var model = {}
 		  , category = categories[i]
 		  , today = new Date();

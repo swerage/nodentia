@@ -22,7 +22,7 @@
 	</option>
 	{{/each}}
 </select>
-<a id="new-sport">[Ny]</a>
+<a id="newSport">[Ny]</a>
 
 <div>League</div>
 <select id="league">
@@ -31,7 +31,7 @@
 	<option value="${league}" {{if viewData.category.league == league}} selected="selected"{{/if}}>${league}</option>
 	{{/each}}
 </select>
-<a id="new-league">[Ny]</a>
+<a id="newLeague">[Ny]</a>
 
 <div>Division</div>
 <select id="division">
@@ -40,7 +40,7 @@
 	<option value="${division}" {{if viewData.category.division == division}} selected="selected"{{/if}}>${division}</option>
 	{{/each}}
 </select>
-<a id="new-division">[Ny]</a>
+<a id="newDivision">[Ny]</a>
 
 {{if !!viewData.category.link}}
 <div>Länk</div>

@@ -1,60 +1,46 @@
 describe("Category", function() {
-	var mongoose = require('mongoose')  
-	  , should = require('should')
-	  , connection = mongoose.createConnection('mongodb://localhost/nodentia_test_db')
-	  , _ = require('../libs/underscore')
-	  , category = require('../models/category')['category']
-	  , game = require('../models/game')['game']
-	  , team = require('../models/team')['team']
+	var mongoose      = require('mongoose')  
+	  , should        = require('should')
+	  , db 			  = require('../db/seed_test')['db']
+	  , _             = require('../libs/underscore')
+	  , category      = require('../models/category')['category']
+	  , game          = require('../models/game')['game']
+	  , team          = require('../models/team')['team']
 	  , eventHandling = require('../business/eventHandling')['eventHandling']
-	  , eventEmitter = eventHandling.getEventEmitter()
+	  , eventEmitter  = eventHandling.getEventEmitter()
+	  , connection    = mongoose.createConnection('mongodb://localhost/nodentia_test_db')
 	  , testCategory
 	  , testGame;
 	
+	team.establishDatabaseConnection(connection);
 	category.establishDatabaseConnection(connection);
+	game.establishDatabaseConnection(connection);
 	
 	beforeEach(function(done) {
-		team.addTeam({ abbr: 'T1', name: 'Team1'}, function(t1) {
-			team.addTeam({ abbr: 'T2', name: 'Team2'}, function(t2) {															
-				category.addCategory({ sport: 'Ping Pong', league: 'Ping Pong League', division: 'Men', route: '/c/pingpong', teams: [t1, t2], starts: new Date('2012-01-01'), ends: new Date('2012-12-31') }, function(newCategory) {
-					game.addGame({ home: t1, away: t2, played: new Date('2012-03-01'), homeScore: 2, awayScore: 1, category: newCategory }, function(newGame) {						
-						testGame = newGame;
-						testCategory = newCategory;
-						testCategory.latestGame = newGame;
-						
-						category.saveCategory(testCategory, function() {							
-							done();	
-						});
-					});
-				});
-			});
+		db.seedTestData(function(data) {
+			testCategory = data.testCategory;
+			testGame     = data.testGame;
+			
+			done();
 		});
 	});	
 	
 	afterEach(function(done) {
-		var teamModel = team.getModel()
-		  ,	categoryModel = category.getModel()
-		  , gameModel = game.getModel(); 
+		testCategory = testGame = {};	
 		
-		testCategory = {};
-		
-		categoryModel.remove({}, function() {			
-			teamModel.remove({}, function() {
-				gameModel.remove({}, function() {
-					done();	
-				});
-			});
-		});
+		db.clearTestData(function() {
+			done();
+		})
 	});
 	
 	it('can add a category', function(done) {
-		testCategory.sport.should.equal('Ping Pong');
-		testCategory.league.should.equal('Ping Pong League');
-		testCategory.division.should.equal('Men');
-		testCategory.route.should.equal('/c/pingpong');
+		testCategory.sport.should.equal('fotboll');
+		testCategory.league.should.equal('Allsvenskan');
+		testCategory.division.should.equal('herr');
+		testCategory.route.should.equal('/g/fotboll');
 		testCategory.teams.length.should.equal(2);
-		testCategory.starts.should.equal(new Date('2012-01-01'));
-		testCategory.ends.should.equal(new Date('2012-12-31'));
+		testCategory.starts.should.equal(new Date('2012-05-08'));
+		testCategory.ends.should.equal(new Date('2012-10-21'));
 		
 		done();
 	});
@@ -62,7 +48,7 @@ describe("Category", function() {
 	it('can edit a category', function(done) {
 		var id = testCategory._id;
 		
-		testCategory.sport.should.equal('Ping Pong');
+		testCategory.sport.should.equal('fotboll');
 		testCategory.sport = 'Table Tennis';
 		
 		category.saveCategory(testCategory, function(savedCategory) {
@@ -81,9 +67,9 @@ describe("Category", function() {
 	});
 	
 	it('can get a category by route', function(done) {
-		category.getCategoryByRoute('/c/pingpong', function(fetchedCategory) {
+		category.getCategoryByRoute('/g/fotboll', function(fetchedCategory) {
 			fetchedCategory.should.not.be.null;
-			fetchedCategory.route.should.equal('/c/pingpong');
+			fetchedCategory.route.should.equal('/g/fotboll');
 			done();
 		});
 	});
@@ -97,7 +83,10 @@ describe("Category", function() {
 	});
 	
 	it('removes team from category', function(done) {
-		done();
+		team.getTeam(testCategory.teams[0]._id, function() {
+			testCategory.teams.length.should.equal(2);
+			done();
+		});
 	});
 	
 	it('can get all divisions', function(done) {
@@ -117,18 +106,18 @@ describe("Category", function() {
 	it('can get all sports', function(done) {
 		category.getAllSports(function(sports) {
 			sports.length.should.not.equal(0);
-			sports.should.include('Ping Pong');
+			sports.should.include('fotboll');
 			done();
 		});
 	});
 	
 	it('can add a team', function(done) {
 		
-		team.addTeam({ abbr: 'T3', name: 'Team3'}, function(t3) {
-			testCategory.teams.push(t3);
+		team.addTeam({ abbr: 'T4', name: 'Team4'}, function(t4) {
+			testCategory.teams.push(t4);
 			
 			testCategory.save(function(e, savedCategory) {
-				savedCategory.teams.should.not.be.empty;
+				savedCategory.teams.length.should.equal(3);
 				done();
 			});
 		});
@@ -157,13 +146,20 @@ describe("Category", function() {
 		});
 	});
 	
+	it('creates a matchup when a category is created', function (done) {
+		testCategory.teams.length.should.equal(2);
+		testCategory.matchup.should.exist;
+		testCategory.matchup.should.equal('aikdif');
+		done();
+	});
+	
 	it('updates matchup when a team is added', function (done) {
-		testCategory.matchup.should.equal('T1T2');
+		testCategory.matchup.should.equal('aikdif');
 		
-		team.addTeam({ abbr: 'T3', name: 'Team3'}, function(t3) {
-			category.addTeamToCategory(testCategory, t3, function() {
+		team.addTeam({ abbr: 'T4', name: 'Team4'}, function(t4) {
+			category.addTeamToCategory(testCategory, t4, function() {
 				category.getCategoryById(testCategory._id, function(savedCategory) {
-					savedCategory.matchup.should.equal('T1T2T3');
+					savedCategory.matchup.should.equal('aikdift4');
 					done();
 				});
 			});
@@ -171,18 +167,17 @@ describe("Category", function() {
 	});
 	
 	it('updates matchup when a team is removed', function(done) {
-		testCategory.matchup.should.equal('T1T2');
+		testCategory.matchup.should.equal('aikdif');
 		
 		category.removeTeamFromCategory(testCategory, testCategory.teams[0], function() {
 			category.getCategoryById(testCategory._id, function(savedCategory) {
-				savedCategory.matchup.should.equal('T2');
+				savedCategory.matchup.should.equal('dif');
 				done();
 			});
 		});
 	});
 	
 	it('updates latestGame if an added game is more recent', function(done) {
-
 		game.getGame(testCategory.latestGame, function(initialGame) {
 			initialGame.played.should.equal(new Date('2012-03-01'));
 			
@@ -200,14 +195,14 @@ describe("Category", function() {
 	
 	it('updates latestGame when the current latest game is edited', function(done) {
 		game.getGame(testCategory.latestGame, function(latestGame) { 
-			latestGame.homeScore.should.equal(2);
-			latestGame.winner[0].abbr.should.equal('T1');
+			latestGame.homeScore.should.equal(3);
+			latestGame.winner[0].abbr.should.equal('AIK');
 			
 			latestGame.homeScore = 0;
 			
 			eventEmitter.emit('updateLatestGame', { game: latestGame, callback: function(updatedCategory) {
 				updatedCategory.latestGame.homeScore.should.equal(0);
-				updatedCategory.latestGame.winner[0].abbr.should.equal('T2');
+				updatedCategory.latestGame.winner[0].abbr.should.equal('DIF');
 				done();
 			}});
 		});
@@ -236,6 +231,14 @@ describe("Category", function() {
 			returnedCategory.should.have.property('latestGame', null);	
 			done();
 		}});
+	});
+
+	it('properly formats a route based on sport', function(done) {
+		testCategory.sport = 'kast med liten gubbe';
+		category.saveCategory(testCategory, function(savedCategory) {
+			savedCategory.should.have.property('route', '/g/kastmedlitengubbe');
+			done();
+		});
 	});
 });
 

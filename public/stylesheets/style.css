@@ -193,7 +193,7 @@ header nav {
 #main #admin #addTeam {
   margin-top: 10px;
 }
-#main #admin .remove-team {
+#main #admin .removeTeam {
   cursor: pointer;
 }
 #main #admin #edit-area {

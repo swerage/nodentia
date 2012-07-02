@@ -1,6 +1,6 @@
 exports.category = (function() {
 	var addCategory, addTeamToCategory, Category, checkLatestGame, establishDatabaseConnection, eventEmitter, eventHandling, 
-	getAllCategories, getAllDivisions, getAllLeagues, getAllSports, getCategoryById, getCategoryByRoute, getModel, 
+	getAllCategories, getAllDivisions, getAllLeagues, getAllSports, getCategoryById, getCategoryByRoute, getModel,
 	removeTeamFromCategory, saveCategory, updateLatestGame, _;
 	
 	eventHandling = require('../business/eventHandling')['eventHandling'];
@@ -10,16 +10,15 @@ exports.category = (function() {
 	addCategory = function(props, callback) {
 		var category = new Category();
 		
-		category.sport = props.sport; 
-		category.league = props.league;
-		category.division = props.division;
-		category.route = props.route;
-		category.starts = props.starts;
-		category.ends = props.ends;
+		category.sport      = props.sport; 
+		category.league     = props.league;
+		category.division   = props.division;
+		category.starts     = props.starts;
+		category.ends       = props.ends;
 		category.latestGame = props.latestGame;
-		category.teams = props.teams;
-		
-		category.matchup = getMatchupFromTeams(category.teams);
+		category.teams      = props.teams;	
+		category.matchup    = getMatchupFromTeams(category.teams);
+		category.route      = getRouteFromSportAndDivision(category.sport, category.division);
 		
 		category.save(function(e, savedCategory) {
 			callback(savedCategory);
@@ -27,9 +26,9 @@ exports.category = (function() {
 	};
 	
 	addTeamToCategory = function(category, team, callback) {
-
 		category.teams.push(team);
 		category.matchup = getMatchupFromTeams(category.teams);
+		
 		category.save(function() {
 			callback();
 		})
@@ -56,10 +55,10 @@ exports.category = (function() {
 	};
 	
 	establishDatabaseConnection = function(connection) {
-		var mongoose = require('mongoose')
-		  , schemas = require('../db/schemas')["schemas"]
-		  , categorySchema = schemas.categorySchema
-		  , gameSchema = schemas.gameSchema;
+		var mongoose               = require('mongoose')
+		  , schemas                = require('../db/schemas')["schemas"]
+		  , categorySchema         = schemas.categorySchema
+		  , gameSchema             = schemas.gameSchema;
 		
 		Category = connection.model('Category', categorySchema);
 		mongoose.model('Game', gameSchema);
@@ -121,16 +120,16 @@ exports.category = (function() {
 
 		getCategoryById(category._id, function(existingCategory) {	
 			if (!!existingCategory) {
-				existingCategory.sport 		= category.sport; 
-				existingCategory.league 	= category.league;
-				existingCategory.division 	= category.division;
-				existingCategory.route 		= category.route;
-				existingCategory.starts 	= category.starts;
-				existingCategory.ends 		= category.ends;
+				existingCategory.sport      = category.sport; 
+				existingCategory.league     = category.league;
+				existingCategory.division   = category.division;
+				existingCategory.route      = category.route;
+				existingCategory.starts     = category.starts;
+				existingCategory.ends       = category.ends;
 				existingCategory.latestGame = category.latestGame;
-				existingCategory.teams 		= category.teams;
-
-				existingCategory.matchup = getMatchupFromTeams(category.teams);
+				existingCategory.teams      = category.teams;
+				existingCategory.matchup    = getMatchupFromTeams(category.teams);
+				existingCategory.route      = getRouteFromSportAndDivision(category.sport, category.division); 
 				
 				existingCategory.save(function(e, savedCategory) {
 					callback(savedCategory);
@@ -146,7 +145,7 @@ exports.category = (function() {
 		if (!!params.game) {			
 			getCategoryById(params.game.category, function(category) {
 				var savedGameIsLatestGame = !!category && !!category.latestGame && !!category.latestGame._id && category.latestGame._id.toString() === params.game._id.toString()
-				  , savedGameIsNewerThanCurrentLatestGame =  !!category && (!category.latestGame || category.latestGame.played < params.game.played);
+				 , savedGameIsNewerThanCurrentLatestGame =  !!category && (!category.latestGame || category.latestGame.played < params.game.played);
 				
 				if (savedGameIsLatestGame) {
 					category.latestGame.played 		= params.game.played;
@@ -186,7 +185,12 @@ exports.category = (function() {
 	};
 	
 	function getMatchupFromTeams(teams) {
-		return _.pluck(teams, 'abbr').join('');
+		return _.pluck(teams, 'abbr').join('').toLowerCase();
+	}
+	
+	function getRouteFromSportAndDivision(sport, division) {
+		var route = '/g/' + sport.replace(/\s/g, '').toLowerCase();
+		return !!division && division.toLowerCase() !== 'herr' ? route + '/' + division.toLowerCase() : route;
 	}
 	
 	eventEmitter.on('updateLatestGame', function(params) {
@@ -209,6 +213,7 @@ exports.category = (function() {
 	  ,	getCategoryById: getCategoryById
 	  , getCategoryByRoute: getCategoryByRoute
 	  , getModel: getModel	
+	  , getRouteFromSportAndDivision: getRouteFromSportAndDivision
 	  , removeTeamFromCategory: removeTeamFromCategory
 	  , saveCategory: saveCategory
 	  , updateLatestGame: updateLatestGame

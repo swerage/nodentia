@@ -43,12 +43,16 @@ nodentia.admin = (function() {
 		});
 	};
 	
-	saveCategory = function(category) { 
-		$.post('/admin/category/save', { category: category }, function(response) { });
+	saveCategory = function(category, callback) {
+		$.post('/admin/category/save', { category: category }, function(response) { 
+			callback();
+		});
 	};
 	
 	saveGame = function(game) {
-		$.post('/admin/game/save', { game: game }, function(response) { });
+		$.post('/admin/game/save', { game: game }, function(response) { 
+			callback();
+		});
 	};
 	
 	return {
