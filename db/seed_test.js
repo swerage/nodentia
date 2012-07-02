@@ -58,6 +58,7 @@ exports.db = (function() {
 				callback({ 
 					testCategory: updatedCategory
 				  , testGame: createdGame 
+				  , testTeams: createdTeams
 				});
 			});	
 		});

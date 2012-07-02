@@ -20,7 +20,6 @@ describe("Category", function() {
 		db.seedTestData(function(data) {
 			testCategory = data.testCategory;
 			testGame     = data.testGame;
-			
 			done();
 		});
 	});	

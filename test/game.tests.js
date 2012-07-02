@@ -1,63 +1,49 @@
 describe('Games', function() {
-	var mongoose = require('mongoose')  
-	  , should = require('should')
-	  , conn = mongoose.createConnection('mongodb://localhost/nodentia_test_db')
-	  , game = require('../models/game')['game']
-	  , team = require('../models/team')['team']
-	  , category = require('../models/category')['category']
-	  , testGame = {};
+	var mongoose     = require('mongoose')  
+	  , should       = require('should')
+	  , db           = require('../db/seed_test')['db']
+	  , connection   = mongoose.createConnection('mongodb://localhost/nodentia_test_db')
+	  , category     = require('../models/category')['category']
+	  , game         = require('../models/game')['game']
+	  , team         = require('../models/team')['team']
+	  , category     = require('../models/category')['category']
+	  , testCategory = {}
+	  , testGame     = {};
 	
-	game.establishDatabaseConnection(conn);
+	team.establishDatabaseConnection(connection);
+	category.establishDatabaseConnection(connection);
+	game.establishDatabaseConnection(connection);
 	
 	beforeEach(function(done){
-		team.addTeam({ abbr: 'T1', name: 'Team1'}, function(t1) {
-			team.addTeam({ abbr: 'T2', name: 'Team2' }, function(t2) {
-				category.addCategory({ sport: 'Kast med liten gubbe'}, function(cat) {
-					category.addCategory({ sport: 'Other silly sport', teams: [t1, t2]}, function(cat2) {
-						game.addGame({ home: t1, away: t2, homeScore: 2, awayScore: 1, overtimeWin: false, shootoutWin: true, played: new Date('2012-01-01'), season: '2012', category: cat2, arena: 'Buddy Arena' }, function(newGame) {
-							
-							game.addGame({ home: t1, away: t2, homeScore: 2, awayScore: 1, overtimeWin: false, shootoutWin: true, played: new Date('2012-01-01'), season: '2012', category: cat, arena: 'Buddy Arena' }, function(newGame) {								
-								testGame = newGame;
-								done();
-							});
-						});
-					});
-				});
-			});
+		db.seedTestData(function(data) {
+			testCategory = data.testCategory;
+			testGame     = data.testGame;
+			done();
 		});
 	});
 	
 	afterEach(function(done) {
-		var teamModel = team.getModel()
-		  ,	categoryModel = category.getModel()
-		  , gameModel = game.getModel(); 
-		
-		testGame = {};
-		
-		categoryModel.remove({}, function() {			
-			teamModel.remove({}, function() {
-				gameModel.remove({}, function() {
-					done();	
-				});
-			});
-		});
+		testCategory = testGame = {};		
+		db.clearTestData(function() {
+			done();
+		})
 	});
 
 	it('adds a game', function(done) {
-		testGame.home[0].should.be.a('object').and.have.property('abbr', 'T1'); 
-		testGame.home[0].should.be.a('object').and.have.property('name', 'Team1');
+		testGame.home[0].should.be.a('object').and.have.property('abbr', 'AIK'); 
+		testGame.home[0].should.be.a('object').and.have.property('name', 'Allmänna Idrottsklubben');
 		
-		testGame.away[0].should.be.a('object').and.have.property('abbr', 'T2'); 
-		testGame.away[0].should.be.a('object').and.have.property('name', 'Team2');
+		testGame.away[0].should.be.a('object').and.have.property('abbr', 'DIF'); 
+		testGame.away[0].should.be.a('object').and.have.property('name', 'Djurgårdens IF');
 		
 		testGame.winner.length.should.not.equal(0);
 		testGame.winner[0].should.be.a('object').and.have.property('_id', testGame.home[0]._id);
 		
-		testGame.homeScore.should.equal(2);
+		testGame.homeScore.should.equal(3);
 		testGame.awayScore.should.equal(1);
 		testGame.overtimeWin.should.equal(false);
-		testGame.shootoutWin.should.equal(true);
-		testGame.played.should.equal(new Date('2012-01-01'));
+		testGame.shootoutWin.should.equal(false);
+		testGame.played.should.equal(new Date('2012-03-01'));
 		testGame.season.should.equal('2012');		
 		
 		testGame.category.should.not.equal('null');
@@ -67,7 +53,7 @@ describe('Games', function() {
 	
 	it('sets a winner when a game is added if there is one', function(done) {
 		testGame.winner.length.should.not.equal(0);
-		testGame.winner[0].abbr.should.equal('T1');
+		testGame.winner[0].abbr.should.equal('AIK');
 		done();
 	});
 	
@@ -87,7 +73,7 @@ describe('Games', function() {
 	it('removes a game', function(done) {
 		game.removeGame(testGame, function() {
 			game.getAllGames(function(games) {
-				games.length.should.equal(1);
+				games.length.should.equal(0);
 				done();
 			});
 		});
@@ -152,13 +138,26 @@ describe('Games', function() {
 		});
 	});
 
-	it('updates the winner when the scores change', function(done) {
+	it('updates the winner when the score changes so that there is a new winner', function(done) {
 		testGame.winner.length.should.not.equal(0);
-		testGame.winner[0].abbr.should.equal('T1');
+		testGame.winner[0].abbr.should.equal('AIK');
+		testGame.awayScore = 4;
+		
+		game.saveGame(testGame, function(savedGame) {
+			savedGame.winner[0].abbr.should.equal('DIF');
+			done();
+		});
+	});
+
+	it('updates the winner when the score changes so that there is no winner when it is a draw', function (done) {
+		testGame.winner.length.should.not.equal(0);
+		testGame.winner[0].abbr.should.equal('AIK');
 		testGame.awayScore = 3;
 		
 		game.saveGame(testGame, function(savedGame) {
-			savedGame.winner[0].abbr.should.equal('T2');
+			savedGame.homeScore.should.equal(3);
+			savedGame.awayScore.should.equal(3);
+			savedGame.winner.length.should.equal(0);
 			done();
 		});
 	});

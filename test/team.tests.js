@@ -1,25 +1,29 @@
 describe("Teams", function() {	
-	var mongoose = require('mongoose')  
-	  , should = require("should")
-	  , conn = mongoose.createConnection('mongodb://localhost/nodentia_test_db')
-	  , team = require('../models/team')["team"]
+	var mongoose   = require('mongoose')  
+	  , should     = require("should")
+	  , db         = require('../db/seed_test')['db']
+	  , connection = mongoose.createConnection('mongodb://localhost/nodentia_test_db')
+	  , category   = require('../models/category')['category']
+	  , game       = require('../models/game')['game']
+	  , team       = require('../models/team')['team']
 	  , testTeam;
 	
-	team.establishDatabaseConnection(conn);
+	team.establishDatabaseConnection(connection);
+	category.establishDatabaseConnection(connection);
+	game.establishDatabaseConnection(connection);
 	
 	beforeEach(function(done) {
-		team.addTeam({ abbr: "TM1", name: "Team1" }, function(doc) {			
-			team.addTeam({ abbr: "TM2", name: "Team2" }, function(doc2) {
-				testTeam = doc;
-				done();
-			});
+		db.seedTestData(function(data) {
+			testTeam = data.testTeams[0];
+			done();
 		});
 	});	
 	afterEach(function(done) {
-		var teamsModel = team.getModel(); 
-		teamsModel.remove({}, function() {
+		testTeam = {};
+		
+		db.clearTestData(function() {
 			done();
-		});
+		})
 	});
 		
 	it('adds a team', function(done) {
