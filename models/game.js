@@ -71,16 +71,16 @@ exports.game = (function() {
 		
 		getGame(game._id, function(existingGame) {
 			if (!!existingGame) {
-				existingGame.home		 = game.home;
-				existingGame.away		 = game.away;
-				existingGame.homeScore 	 = game.homeScore;
-				existingGame.awayScore 	 = game.awayScore;
+				existingGame.home        = game.home;
+				existingGame.away        = game.away;
+				existingGame.homeScore   = game.homeScore;
+				existingGame.awayScore   = game.awayScore;
 				existingGame.overtimeWin = game.overtimeWin;
 				existingGame.shootoutWin = game.shootoutWin;
-				existingGame.played		 = game.played;
-				existingGame.season		 = game.season;
-				existingGame.category	 = game.category;
-				existingGame.arena		 = game.arena;
+				existingGame.played      = game.played;
+				existingGame.season      = game.season;
+				existingGame.category    = game.category;
+				existingGame.arena       = game.arena;
 				
 				if (+existingGame.homeScore !== +existingGame.awayScore) {
 					existingGame.winner = existingGame.homeScore > existingGame.awayScore ? existingGame.home : existingGame.away;
@@ -114,7 +114,7 @@ exports.game = (function() {
 	
 	return {
 	    addGame: addGame
-	  ,	establishDatabaseConnection: establishDatabaseConnection
+	  , establishDatabaseConnection: establishDatabaseConnection
 	  , getAllGames: getAllGames
 	  , getAllGamesByCategory: getAllGamesByCategory
 	  , getGame: getGame
