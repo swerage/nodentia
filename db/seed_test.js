@@ -6,10 +6,10 @@ exports.db = (function() {
 	  , game            = require('../models/game')['game']
 	  , createdTeams    = []
 	  , createdCategory = {}
-	  , clearTestData
-	  , seedTestData;
+	  , clearData
+	  , seedData;
 	
-	clearTestData = function(callback) {
+	clearData = function(callback) {
 		var Category = category.getModel()
 		  , Team = team.getModel()
 		  , Game = game.getModel();
@@ -26,18 +26,22 @@ exports.db = (function() {
 		});
 	};
 	
-	seedTestData = function(callback) {
-		addTeams(callback);
+	seedData = function(continueSeedingTestData, callback) {
+		addTeams(continueSeedingTestData, callback);
 	};
 	
-	function addTeams(callback) {
+	function addTeams(continueSeedingTestData, callback) {
 		team.addTeam({ abbr: 'AIK', name: 'Allmänna Idrottsklubben' }, function(t1) {
 			team.addTeam({ abbr: 'DIF', name: 'Djurgårdens IF' }, function(t2) {
 				team.addTeam({ abbr: 'HIF', name: 'Hammarby IF' }, function(t3) {
 					createdTeams.push(t1);
 					createdTeams.push(t2);
 					
-					addCategories(callback);
+					if (continueSeedingTestData) {
+						addCategories(callback);
+					} else {
+						callback();
+					}					
 				});
 			});
 		});
@@ -65,7 +69,7 @@ exports.db = (function() {
 	}
 	
 	return {
-		clearTestData: clearTestData
-	  ,	seedTestData: seedTestData
+		clearData: clearData
+	  ,	seedData: seedData
 	}
 }());

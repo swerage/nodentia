@@ -17,7 +17,7 @@ describe("Category", function() {
 	game.establishDatabaseConnection(connection);
 	
 	beforeEach(function(done) {
-		db.seedTestData(function(data) {
+		db.seedData(true, function(data) {
 			testCategory = data.testCategory;
 			testGame     = data.testGame;
 			done();
@@ -27,7 +27,7 @@ describe("Category", function() {
 	afterEach(function(done) {
 		testCategory = testGame = {};	
 		
-		db.clearTestData(function() {
+		db.clearData(function() {
 			done();
 		})
 	});

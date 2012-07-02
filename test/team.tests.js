@@ -13,7 +13,7 @@ describe("Teams", function() {
 	game.establishDatabaseConnection(connection);
 	
 	beforeEach(function(done) {
-		db.seedTestData(function(data) {
+		db.seedData(true, function(data) {
 			testTeam = data.testTeams[0];
 			done();
 		});
@@ -21,7 +21,7 @@ describe("Teams", function() {
 	afterEach(function(done) {
 		testTeam = {};
 		
-		db.clearTestData(function() {
+		db.clearData(function() {
 			done();
 		})
 	});
