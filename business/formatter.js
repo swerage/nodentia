@@ -21,7 +21,7 @@ exports.getCategoryViewModel = function(categories) {
 			if (!!category.latestGame && !!category.latestGame.homeScore) {
 				model.highlight = category.latestGame.homeScore + "-" + category.latestGame.awayScore;
 				
-				if (category.latestGame.homeScore !== category.latestGame.awayScore) {
+				if (+category.latestGame.homeScore !== +category.latestGame.awayScore) {
 					model.image = category.latestGame.winner[0].abbr.toLowerCase()
 				} else {
 					model.image = category.latestGame.home[0].abbr.toLowerCase() + category.latestGame.away[0].abbr.toLowerCase()
