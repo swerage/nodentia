@@ -11,16 +11,8 @@ exports.show = function(req, res) {
 	var sport = req.params.sport,
 		division = req.params.division;
 	
-	bz.getShowViewModel(req.url, function(game, category) {
-
-		if (!game) {
-			res.redirect("back");
-		} else {
-			game.category.sport = formatter.toProperCase(category.sport);
-			game.category.division = formatter.toProperCase(category.division);
-			
-			res.render('show.html', game);
-		}
+	bz.getShowViewModel(req.url, function(viewModel) {
+		!viewModel ? res.redirect("back") : res.render('show.html', viewModel);
 	});
 };
 

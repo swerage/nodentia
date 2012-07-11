@@ -1,7 +1,7 @@
 describe("Category", function() {
 	var mongoose      = require('mongoose')  
 	  , should        = require('should')
-	  , db 			  = require('../db/seed_test')['db']
+	  , db 			  = require('../db/seed')['db']
 	  , _             = require('../libs/underscore')
 	  , category      = require('../models/category')['category']
 	  , game          = require('../models/game')['game']
@@ -40,6 +40,8 @@ describe("Category", function() {
 		testCategory.teams.length.should.equal(2);
 		testCategory.starts.should.equal(new Date('2012-05-08'));
 		testCategory.ends.should.equal(new Date('2012-10-21'));
+		testCategory.latestGame.should.not.be.null;
+		testCategory.nextGame.should.not.be.null;
 		
 		done();
 	});
@@ -176,16 +178,33 @@ describe("Category", function() {
 		});
 	});
 	
-	it('updates latestGame if an added game is more recent', function(done) {
+	it('updates latestGame if an added played game is more recent', function(done) {
 		game.getGame(testCategory.latestGame, function(initialGame) {
 			initialGame.played.should.equal(new Date('2012-03-01'));
 			
 			testGame.played = new Date('2012-03-06');
 			
 			game.addGame(testGame, function(newGame) {
-				eventEmitter.emit('updateLatestGame', { game: newGame, callback: function(updatedCategory) {
+				eventEmitter.emit('gameWasSaved', { game: newGame, callback: function(updatedCategory) {
 					updatedCategory.latestGame._id.toString().should.equal(newGame._id.toString());
 					updatedCategory.latestGame.played.should.equal(newGame.played);
+					done();
+				} });
+			});
+		});
+	});
+	
+	it('updates nextGame if an added unplayed game is closer in time', function(done) {
+		game.getGame(testCategory.nextGame, function(initialGame) {
+			initialGame.played.should.equal(new Date('2014-05-21'));
+			
+			testGame.played = new Date('2013-05-21');
+			
+			game.addGame(testGame, function(newGame) {
+				eventEmitter.emit('gameWasSaved', { game: newGame, callback: function(updatedCategory) {
+
+					updatedCategory.nextGame._id.toString().should.equal(newGame._id.toString());
+					updatedCategory.nextGame.played.should.equal(newGame.played);
 					done();
 				} });
 			});
@@ -199,7 +218,7 @@ describe("Category", function() {
 			
 			latestGame.homeScore = 0;
 			
-			eventEmitter.emit('updateLatestGame', { game: latestGame, callback: function(updatedCategory) {
+			eventEmitter.emit('gameWasSaved', { game: latestGame, callback: function(updatedCategory) {
 				updatedCategory.latestGame.homeScore.should.equal(0);
 				updatedCategory.latestGame.winner[0].abbr.should.equal('DIF');
 				done();
@@ -207,14 +226,39 @@ describe("Category", function() {
 		});
 	});
 	
-	it('does not update latestGame if the game is not most recent when such an event is emitted', function(done) {
-		game.getGame(testCategory.latestGame, function(initialGame) {
-			initialGame.played.should.equal(new Date('2012-03-01'));
+	it('updates nextGame when the closest future game is edited', function (done) {
+		game.getGame(testCategory.nextGame, function(nextGame) {
+			var newHome = nextGame.away[0]
+			  , newAway = nextGame.home[0];
 			
+			nextGame.home[0].abbr.should.equal('DIF');
+			nextGame.away[0].abbr.should.equal('AIK');
+			nextGame.played.should.equal(new Date('2014-05-21'));
+			
+			nextGame.home   = newHome;
+			nextGame.away   = newAway;
+			nextGame.played = new Date('2014-05-22');
+			
+			game.saveGame(nextGame, function(savedGame) {
+				eventEmitter.emit('gameWasSaved', { game: savedGame, callback: function(updatedCategory) {
+
+					updatedCategory.nextGame._id.toString().should.equal(nextGame._id.toString());
+					updatedCategory.nextGame.played.should.equal(nextGame.played);
+					updatedCategory.nextGame.home[0].abbr.should.equal('AIK');
+					updatedCategory.nextGame.away[0].abbr.should.equal('DIF');
+					done();
+				} });
+			});
+		});
+	});
+	
+	it('does not update latestGame if the game saved is not most recent', function(done) {
+		game.getGame(testCategory.latestGame, function(initialGame) {
+			initialGame.played.should.equal(new Date('2012-03-01'));			
 			initialGame.played = new Date('2012-02-28');
 			
 			game.addGame(initialGame, function(newGame) {
-				eventEmitter.emit('updateLatestGame', { game: newGame, callback: function(updatedCategory) {
+				eventEmitter.emit('gameWasSaved', { game: newGame, callback: function(updatedCategory) {
 					updatedCategory.latestGame.should.not.equal(newGame._id);					
 					updatedCategory.latestGame.played.should.equal(new Date('2012-03-01'));
 					done();
@@ -223,15 +267,43 @@ describe("Category", function() {
 		});
 	});
 	
-	it('clears latestGame when such an event is emitted', function (done) {
+	it('does not update nextGame if the game saved is not closer in time than the current', function(done) {
+		game.getGame(testCategory.nextGame, function(initialGame) {
+			initialGame.played.should.equal(new Date('2014-05-21'));
+			initialGame.played = new Date('2014-05-22');
+			
+			game.addGame(initialGame, function(newGame) {
+				eventEmitter.emit('gameWasSaved', { game: newGame, callback: function(updatedCategory) {
+					updatedCategory.nextGame.should.not.equal(newGame._id);					
+					updatedCategory.nextGame.played.should.equal(new Date('2014-05-21'));
+					done();
+				}});
+			});
+		});
+	});
+	
+	it('clears latestGame when that game is removed', function (done) {
 		testCategory.latestGame.should.not.be.null;	
 		
-		eventEmitter.emit('gameWasRemoved', { gameId: testCategory.latestGame, callback: function(returnedCategory) {
-			returnedCategory.should.have.property('latestGame', null);	
-			done();
+		eventEmitter.emit('gameWasRemoved', { gameId: testCategory.latestGame, callback: function(updatedCategory) {
+			category.getCategoryById(testCategory._id, function(updatedCategory) {
+				updatedCategory.should.have.property('latestGame', null);	
+				done();
+			});
 		}});
 	});
+	
+	it('clears nextGame when that game is removed', function(done) {
+		testCategory.nextGame.should.not.be.null;
 
+		eventEmitter.emit('gameWasRemoved', { gameId: testCategory.nextGame._id, callback: function(updatedCategory) {
+			category.getCategoryById(testCategory._id, function(updatedCategory) {
+				updatedCategory.should.have.property('nextGame', null);	
+				done();
+			});
+		}});
+	});
+	
 	it('properly formats a route based on sport', function(done) {
 		testCategory.sport = 'kast med liten gubbe';
 		category.saveCategory(testCategory, function(savedCategory) {

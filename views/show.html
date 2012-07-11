@@ -1,12 +1,16 @@
-<section id="team">
-	<h3>${category.sport} - ${category.division}</h3>
-	<div class="logo ${styleClass}" title="${title}"></div>
+<section id="played">
+	<h3>${sport} - ${league}</h3>
+	<div class="logo ${played.styleClass}" title="${played.title}"></div>
 	
 	<div class="result">
-		<span class="${home[0].abbr.toLowerCase()}-icon">&nbsp;</span> ${homeScore}-${awayScore} <span class="${away[0].abbr.toLowerCase()}-icon">&nbsp;</span>
+		<span class="${played.home[0].abbr.toLowerCase()}-icon">&nbsp;</span> ${played.homeScore}-${played.awayScore} <span class="${played.away[0].abbr.toLowerCase()}-icon">&nbsp;</span>
 	</div>
 	<div class="details">
 	</div>
+</section>
+
+<section id="next">
+	
 </section>
 
 <section id="comments">

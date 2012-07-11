@@ -20,6 +20,7 @@ exports.schemas = (function() {
 	  ,	starts: Date
 	  ,	ends: Date
 	  ,	latestGame:  { type: ObjectId, ref: 'Game' }
+	  , nextGame: { type: ObjectId, ref: 'Game' }
 	}); 
 	
 	Game = new mongoose.Schema({

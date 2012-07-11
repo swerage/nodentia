@@ -1,7 +1,7 @@
 describe('Formatter', function() {
 	var mongoose     = require('mongoose')  
 	  , should       = require('should')
-	  , db           = require('../db/seed_test')['db']
+	  , db           = require('../db/seed')['db']
 	  , connection   = mongoose.createConnection('mongodb://localhost/nodentia_test_db')
 	  , category     = require('../models/category')['category']
 	  , game         = require('../models/game')['game']

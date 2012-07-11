@@ -1,7 +1,7 @@
 exports.category = (function() {
-	var addCategory, addTeamToCategory, Category, checkLatestGame, establishDatabaseConnection, eventEmitter, eventHandling, 
-	getAllCategories, getAllDivisions, getAllLeagues, getAllSports, getCategoryById, getCategoryByRoute, getModel,
-	removeTeamFromCategory, saveCategory, updateLatestGame, _;
+	var addCategory, addTeamToCategory, Category, removeGameFromCategory, establishDatabaseConnection, eventEmitter, eventHandling, 
+		getAllCategories, getAllDivisions, getAllLeagues, getAllSports, getCategoryById, getCategoryByRoute, getModel,
+		removeTeamFromCategory, saveCategory, updateLatestGame, updateNextGame, _;
 	
 	eventHandling = require('../business/eventHandling')['eventHandling'];
 	eventEmitter = eventHandling.getEventEmitter();
@@ -32,26 +32,6 @@ exports.category = (function() {
 		category.save(function() {
 			callback();
 		})
-	};
-	
-	checkLatestGame = function(gameId, callback) {
-		Category.findOne({ 'latestGame': gameId }, function (e, category) {
-
-			if (!!category && !!category.save) {
-				category.latestGame = null;
-				
-				saveCategory(category, function(savedCategory) {
-					eventEmitter.emit('latestGameWasClearedForCategory', savedCategory._id);
-					if (!!callback) {
-						callback(savedCategory);
-					}
-				});
-			} else {
-				if (!!callback) {
-					callback(category);
-				}
-			}
-		});
 	};
 	
 	establishDatabaseConnection = function(connection) {
@@ -92,7 +72,7 @@ exports.category = (function() {
 	};
 	
 	getCategoryById = function(id, callback) {
-		Category.findOne({ _id: id }).populate('latestGame').exec(function(err, category) {
+		Category.findOne({ _id: id }).populate('latestGame').populate('nextGame').exec(function(err, category) {
 			callback(category);
 		});
 	};
@@ -105,6 +85,16 @@ exports.category = (function() {
 	
 	getModel = function() {
 		return Category;
+	};
+	
+	removeGameFromCategory = function(gameId, callback) {
+		Category.update({ latestGame: gameId }, { latestGame: null }, null, function() {
+			Category.update({ nextGame: gameId }, { nextGame: null }, null, function() {
+				if (!!callback) {
+					callback();
+				}
+			});
+		});
 	};
 	
 	removeTeamFromCategory = function(category, team, callback) {
@@ -141,47 +131,45 @@ exports.category = (function() {
 	};
 	
 	updateLatestGame = function(params, callback) {
-
-		if (!!params.game) {			
-			getCategoryById(params.game.category, function(category) {
-				var savedGameIsLatestGame = !!category && !!category.latestGame && !!category.latestGame._id && category.latestGame._id.toString() === params.game._id.toString()
-				 , savedGameIsNewerThanCurrentLatestGame =  !!category && (!category.latestGame || category.latestGame.played < params.game.played);
+		getCategoryById(params.game.category, function(category) {
+			var savedGameIsLatestGame = !!category.latestGame && category.latestGame._id.toString() === params.game._id.toString()
+			  , savedGameIsNewerThanCurrentLatestGame =  !category.latestGame || category.latestGame.played < params.game.played;
+			
+			if (savedGameIsLatestGame) {
+				updateExistingCategoryGame(category, category.latestGame, params.game, function(updatedCategory) {
+					callback(updatedCategory);
+				});
+			} else if (savedGameIsNewerThanCurrentLatestGame) {
+				category.latestGame = params.game;
 				
-				if (savedGameIsLatestGame) {
-					category.latestGame.played 		= params.game.played;
-					category.latestGame.homeScore 	= params.game.homeScore;
-					category.latestGame.awayScore 	= params.game.awayScore;
-
-					if (+category.latestGame.homeScore !== +category.latestGame.awayScore) {
-						category.latestGame.winner = category.latestGame.homeScore > category.latestGame.awayScore ? category.latestGame.home : category.latestGame.away;
-					} else {
-						category.latestGame.winner = [];
-					}
-
-					category.save(function(e, updatedCategory) {
-						if (!!callback) {
-							callback(updatedCategory);
-						}
-					});
-				} else if (savedGameIsNewerThanCurrentLatestGame) {
-					category.latestGame = params.game;
-					
-					category.save(function(e, updatedCategory) {
-						if (!!callback) {
-							getCategoryById(updatedCategory._id, callback);
-						}
-					});
-				} else {
-					if (!!callback) {
-						callback(category);
-					}	
-				}
-			});
-		} else {
-			if (!!callback) {
-				callback();
+				category.save(function(e, updatedCategory) {
+					getCategoryById(updatedCategory._id, callback);
+				});
+			} else {
+				callback(category);	
 			}
-		}
+		});
+	};
+	
+	updateNextGame = function(params, callback) {
+		getCategoryById(params.game.category, function(category) {
+			var savedGameIsNextGame = !!category.nextGame && category.nextGame._id.toString() === params.game._id.toString()
+			  , savedGameIsCloserToNowThanCurrentNextGame = !category.nextGame || category.nextGame.played > params.game.played
+			
+			if (savedGameIsNextGame) {
+				updateExistingCategoryGame(category, category.nextGame, params.game, function(updatedCategory) {
+					callback(updatedCategory);
+				});
+			} else if (savedGameIsCloserToNowThanCurrentNextGame) {
+				category.nextGame = params.game;
+
+				category.save(function(e, updatedCategory) {
+					getCategoryById(updatedCategory._id, callback);
+				});
+			} else {
+				callback(category);
+			}
+		});
 	};
 	
 	function getMatchupFromTeams(teams) {
@@ -193,18 +181,65 @@ exports.category = (function() {
 		return !!division && division.toLowerCase() !== 'herr' ? route + '/' + division.toLowerCase() : route;
 	}
 	
-	eventEmitter.on('updateLatestGame', function(params) {
-		updateLatestGame(params, params.callback);
+	function removeLatestGameFromCategory(gameId, callback) {
+		Category.findOne({ 'latestGame': gameId }, function (e, category) {
+			if (!!category) {
+				category.latestGame = null;				
+				saveCategory(category, function(savedCategory) {
+					callback(savedCategory);
+				});
+			} else {
+				callback();
+			}
+		});
+	}
+	
+	function removeNextGameFromCategory(gameId, callback) {
+		Category.findOne({ 'nextGame': gameId }, function (e, category) {
+			if (!!category) {
+				category.nextGame = null;				
+				saveCategory(category, function(savedCategory) {
+					callback(savedCategory);
+				});
+			} else {
+				callback();
+			}
+		});
+	}
+	
+	function updateExistingCategoryGame(category, categoryGame, savedGame, callback) {
+		categoryGame.played 	= savedGame.played;
+		categoryGame.homeScore 	= savedGame.homeScore;
+		categoryGame.awayScore 	= savedGame.awayScore;
+
+		if (+categoryGame.homeScore !== +categoryGame.awayScore) {
+			categoryGame.winner = categoryGame.homeScore > categoryGame.awayScore ? categoryGame.home : categoryGame.away;
+		} else {
+			categoryGame.winner = [];
+		}
+
+		category.save(function(e, updatedCategory) {
+			callback(updatedCategory);
+		});
+	}
+	
+	eventEmitter.on('gameWasSaved', function(params) {
+		var gameHasBeenPlayed = params.game.played <= new Date();
+
+		if (gameHasBeenPlayed) {
+			updateLatestGame(params, params.callback);
+		} else {
+			updateNextGame(params, params.callback);
+		}		
 	});
 	
 	eventEmitter.on('gameWasRemoved', function(params) {
-		checkLatestGame(params.gameId, params.callback);
+		removeGameFromCategory(params.gameId, params.callback);
 	});
 	
 	return {
 	  	addCategory: addCategory
 	  ,	addTeamToCategory: addTeamToCategory
-	  , checkLatestGame: checkLatestGame
 	  ,	establishDatabaseConnection: establishDatabaseConnection
 	  , getAllCategories: getAllCategories
 	  , getAllDivisions: getAllDivisions
@@ -214,8 +249,10 @@ exports.category = (function() {
 	  , getCategoryByRoute: getCategoryByRoute
 	  , getModel: getModel	
 	  , getRouteFromSportAndDivision: getRouteFromSportAndDivision
+	  , removeGameFromCategory: removeGameFromCategory
 	  , removeTeamFromCategory: removeTeamFromCategory
 	  , saveCategory: saveCategory
 	  , updateLatestGame: updateLatestGame
+	  , updateNextGame: updateNextGame
 	}
 }());

@@ -1,7 +1,7 @@
 (function() {
 	var mongoose        = require('mongoose')
 	  , connection      = mongoose.createConnection('mongodb://localhost/nodentia_db')
-	  , db              = require('../db/seed_test')['db']
+	  , db              = require('../db/seed')['db']
 	  , schemas         = require('../db/schemas')["schemas"]
 	  , team            = require('../models/team')['team']
 	  , category        = require('../models/category')['category']

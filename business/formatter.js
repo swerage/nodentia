@@ -8,7 +8,7 @@ exports.getCategoryViewModel = function(categories) {
 		
 		model.category = category;
 		model.division = category.division === 'dam' ? "- Dam" : category.division;
-		model.sportProper = this.toProperCase(category.sport);
+		model.sportProper = toProperCase(category.sport);
 		
 		if (!!category.latestGame && !!category.latestGame.home) {
 			model.category.matchup = category.latestGame.home[0].abbr.toLowerCase() + category.latestGame.away[0].abbr.toLowerCase()
@@ -38,11 +38,25 @@ exports.getCategoryViewModel = function(categories) {
 };
 
 exports.getDateString = function(date) {
-	var year = addZeroIfNeeded(date.getFullYear())
+	var year  = addZeroIfNeeded(date.getFullYear())
 	  , month = addZeroIfNeeded(date.getMonth() + 1)
-	  , day = addZeroIfNeeded(date.getDate());				
+	  , day   = addZeroIfNeeded(date.getDate());				
 	
 	return year + '-' + month + '-' + day;
+};
+
+exports.getShowViewModel = function(category, callback) {
+	
+	category.latestGame.styleClass = !!category.latestGame.winner[0]
+		? category.latestGame.winner[0].abbr.toLowerCase()
+		: category.latestGame.home[0].abbr.toLowerCase() + category.latestGame.away[0].abbr.toLowerCase();					
+	
+	callback({ 
+		sport: toProperCase(category.sport), 
+		league: toProperCase(category.league), 
+		played: category.latestGame, 
+		next: category.nextGame 
+	});
 };
 
 exports.getTimeString = function(date) {
@@ -50,10 +64,6 @@ exports.getTimeString = function(date) {
 	  , minutes = addZeroIfNeeded(date.getMinutes());
 	
 	return hours + ":" + minutes;
-};
-
-exports.toProperCase = function(value) {
-	return value.substr(0,1).toUpperCase() + value.substr(1);
 };
 
 function addZeroIfNeeded(digit) {
@@ -69,4 +79,8 @@ function getDayOfYear(d) {
 	 	diff = Math.round((d2-d1)/864e5);
 
 	return diff + 1;
+}
+
+function toProperCase(value) {
+	return value.substr(0,1).toUpperCase() + value.substr(1);
 }

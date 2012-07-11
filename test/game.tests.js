@@ -1,7 +1,7 @@
 describe('Games', function() {
 	var mongoose     = require('mongoose')  
 	  , should       = require('should')
-	  , db           = require('../db/seed_test')['db']
+	  , db           = require('../db/seed')['db']
 	  , connection   = mongoose.createConnection('mongodb://localhost/nodentia_test_db')
 	  , category     = require('../models/category')['category']
 	  , game         = require('../models/game')['game']
@@ -73,7 +73,7 @@ describe('Games', function() {
 	it('removes a game', function(done) {
 		game.removeGame(testGame, function() {
 			game.getAllGames(function(games) {
-				games.length.should.equal(0);
+				games.length.should.equal(1);
 				done();
 			});
 		});
@@ -91,7 +91,7 @@ describe('Games', function() {
 	
 	it ('gets all games by category', function(done) {
 		game.getAllGamesByCategory(testGame.category, function(games) {
-			games.length.should.equal(1);
+			games.length.should.equal(2);
 			games[0].category._id.toString().should.equal(testGame.category.toString());
 			done();
 		});

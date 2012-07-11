@@ -118,17 +118,13 @@ exports.getLeagues = function(callback) {
 exports.getShowViewModel = function(route, callback) {
 	
 	category.getCategoryByRoute(route, function(gameCategory) {	
-		game.getGame(gameCategory.latestGame._id, function(fetchedGame) {
-			if (!fetchedGame) {
-				callback(null);
-			} else {		
-				category.getCategoryById(fetchedGame.category, function(fetchedCategory) {
-					fetchedGame.styleClass = !!fetchedGame.winner[0] ? fetchedGame.winner[0].abbr.toLowerCase() : fetchedGame.home[0].abbr.toLowerCase() + fetchedGame.away[0].abbr.toLowerCase();
-					
-					callback(fetchedGame, fetchedCategory);
-				});
-			}
-		});
+		if (!gameCategory.latestGame) {
+			callback(null);
+		} else {
+			formatter.getShowViewModel(gameCategory, function(viewModel) {
+				callback(viewModel);
+			});
+		}
 	});
 };
 	
