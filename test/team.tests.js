@@ -1,12 +1,12 @@
-describe("Teams", function() {	
-	var mongoose   = require('mongoose')  
-	  , should     = require("should")
-	  , db         = require('../db/seed')['db']
-	  , connection = mongoose.createConnection('mongodb://localhost/nodentia_test_db')
-	  , category   = require('../models/category')['category']
-	  , game       = require('../models/game')['game']
-	  , team       = require('../models/team')['team']
-	  , testTeam;
+describe("Teams", function() {
+	var mongoose   = require('mongoose')
+		, should     = require("should")
+		, db         = require('../db/seed')['db']
+		, connection = mongoose.createConnection('mongodb://localhost/nodentia_test_db')
+		, category   = require('../models/category')['category']
+		, game       = require('../models/game')['game']
+		, team       = require('../models/team')['team']
+		, testTeam;
 	
 	team.establishDatabaseConnection(connection);
 	category.establishDatabaseConnection(connection);
@@ -17,13 +17,13 @@ describe("Teams", function() {
 			testTeam = data.testTeams[0];
 			done();
 		});
-	});	
+	});
 	afterEach(function(done) {
 		testTeam = {};
 		
 		db.clearData(function() {
 			done();
-		})
+		});
 	});
 		
 	it('adds a team', function(done) {
@@ -40,8 +40,9 @@ describe("Teams", function() {
 	
 	it('can get a team by id', function(done) {
 		team.getTeam(testTeam._id, function(fetchedTeam) {
-			fetchedTeam.should.not.be.null;
+			fetchedTeam.should.not.be['null'];
 			fetchedTeam._id.toString().should.equal(testTeam._id.toString());
+			
 			done();
 		});
 	});

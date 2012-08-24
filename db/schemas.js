@@ -7,39 +7,39 @@ exports.schemas = (function() {
 	
 	Team = new mongoose.Schema({
 		abbr: String
-	  , name: String
+	, name: String
 	});
 	
-	Category = new mongoose.Schema({ 
-	  	sport: String 
-	  ,	league: String
-	  ,	division: String
-	  ,	route: String
-	  ,	teams: [Team]
-	  ,	matchup: String
-	  ,	starts: Date
-	  ,	ends: Date
-	  ,	latestGame:  { type: ObjectId, ref: 'Game' }
-	  , nextGame: { type: ObjectId, ref: 'Game' }
-	}); 
+	Category = new mongoose.Schema({
+		sport: String
+	,	league: String
+	,	division: String
+	,	route: String
+	,	teams: [Team]
+	,	matchup: String
+	,	starts: Date
+	,	ends: Date
+	,	latestGame: { type: ObjectId, ref: 'Game' }
+	, nextGame:   { type: ObjectId, ref: 'Game' }
+	});
 	
 	Game = new mongoose.Schema({
-	    home: [Team]
-	  , away: [Team]
-	  , homeScore: Number
-	  , awayScore: Number
-	  , winner: [Team]
-	  , overtimeWin: Boolean
-	  , shootoutWin: Boolean
-	  , played: Date
-	  , season: String
-	  , category: { type: ObjectId, ref: 'Category' }
-	  , arena: String					
+		home: [Team]
+	, away: [Team]
+	, homeScore: Number
+	, awayScore: Number
+	, winner: [Team]
+	, overtimeWin: Boolean
+	, shootoutWin: Boolean
+	, played: Date
+	, season: String
+	, category: { type: ObjectId, ref: 'Category' }
+	, arena: String
 	});
 	
 	return {
 		categorySchema: Category
-	  , gameSchema: Game
-	  ,	teamSchema: Team
-	}
+	, gameSchema: Game
+	,	teamSchema: Team
+	};
 }());

@@ -1,14 +1,13 @@
 describe('Games', function() {
-	var mongoose     = require('mongoose')  
-	  , should       = require('should')
-	  , db           = require('../db/seed')['db']
-	  , connection   = mongoose.createConnection('mongodb://localhost/nodentia_test_db')
-	  , category     = require('../models/category')['category']
-	  , game         = require('../models/game')['game']
-	  , team         = require('../models/team')['team']
-	  , category     = require('../models/category')['category']
-	  , testCategory = {}
-	  , testGame     = {};
+	var mongoose     = require('mongoose')
+		, should       = require('should')
+		, db           = require('../db/seed')['db']
+		, connection   = mongoose.createConnection('mongodb://localhost/nodentia_test_db')
+		, category     = require('../models/category')['category']
+		, game         = require('../models/game')['game']
+		, team         = require('../models/team')['team']
+		, testCategory = {}
+		, testGame     = {};
 	
 	team.establishDatabaseConnection(connection);
 	category.establishDatabaseConnection(connection);
@@ -18,22 +17,24 @@ describe('Games', function() {
 		db.seedData(true, function(data) {
 			testCategory = data.testCategory;
 			testGame     = data.testGame;
+			
 			done();
 		});
 	});
 	
 	afterEach(function(done) {
-		testCategory = testGame = {};		
+		testCategory = testGame = {};
+		
 		db.clearData(function() {
 			done();
-		})
+		});
 	});
 
 	it('adds a game', function(done) {
-		testGame.home[0].should.be.a('object').and.have.property('abbr', 'AIK'); 
+		testGame.home[0].should.be.a('object').and.have.property('abbr', 'AIK');
 		testGame.home[0].should.be.a('object').and.have.property('name', 'Allmänna Idrottsklubben');
 		
-		testGame.away[0].should.be.a('object').and.have.property('abbr', 'DIF'); 
+		testGame.away[0].should.be.a('object').and.have.property('abbr', 'DIF');
 		testGame.away[0].should.be.a('object').and.have.property('name', 'Djurgårdens IF');
 		
 		testGame.winner.length.should.not.equal(0);
@@ -44,7 +45,7 @@ describe('Games', function() {
 		testGame.overtimeWin.should.equal(false);
 		testGame.shootoutWin.should.equal(false);
 		testGame.played.should.equal(new Date('2012-03-01'));
-		testGame.season.should.equal('2012');		
+		testGame.season.should.equal('2012');
 		
 		testGame.category.should.not.equal('null');
 		
@@ -60,9 +61,10 @@ describe('Games', function() {
 	it('does not set a winner if there isnt one', function(done) {
 		team.addTeam({ abbr: 'T3', name: 'Team3'}, function(t3) {
 			team.addTeam({ abbr: 'T4', name: 'Team4' }, function(t4) {
-				category.addCategory({ sport: 'Whatever' }, function(cat) {					
+				category.addCategory({ sport: 'Whatever' }, function(cat) {
 					game.addGame({ home: t3, away: t4, homeScore: 1, awayScore: 1, overtimeWin: false, shootoutWin: true, played: new Date('2012-01-01'), season: '2012', category: cat, arena: 'Buddy Arena' }, function(newGame) {
 						newGame.winner.length.should.equal(0);
+						
 						done();
 					});
 				});
@@ -74,6 +76,7 @@ describe('Games', function() {
 		game.removeGame(testGame, function() {
 			game.getAllGames(function(games) {
 				games.length.should.equal(1);
+				
 				done();
 			});
 		});
@@ -84,6 +87,7 @@ describe('Games', function() {
 				
 			game.getAllGames(function(games) {
 				games.length.should.be.above(1);
+				
 				done();
 			});
 		});
@@ -93,13 +97,14 @@ describe('Games', function() {
 		game.getAllGamesByCategory(testGame.category, function(games) {
 			games.length.should.equal(2);
 			games[0].category._id.toString().should.equal(testGame.category.toString());
+			
 			done();
 		});
 	});
 	
 	it('can have its properties updated', function(done) {
 		var testGameId = testGame._id
-		  ,	previousCategoryId = testGame.category;
+			,	previousCategoryId = testGame.category;
 		
 		team.addTeam({ abbr: 'T3', name: 'Team3'}, function(t3) {
 			team.addTeam({ abbr: 'T4', name: 'Team4' }, function(t4) {
@@ -119,7 +124,7 @@ describe('Games', function() {
 					testGame.save(function(e, savedGame) {
 						savedGame._id.should.equal(testGameId);
 						
-						savedGame.home[0].should.be.a('object').and.have.property('abbr', 'T3'); 
+						savedGame.home[0].should.be.a('object').and.have.property('abbr', 'T3');
 						savedGame.home[0].should.be.a('object').and.have.property('name', 'Team3');
 
 						savedGame.homeScore.should.equal(1);
@@ -127,7 +132,7 @@ describe('Games', function() {
 						savedGame.overtimeWin.should.equal(true);
 						savedGame.shootoutWin.should.equal(false);
 						savedGame.played.should.equal(new Date('2012-10-21'));
-						savedGame.season.should.equal('2009');		
+						savedGame.season.should.equal('2009');
 
 						savedGame.category.should.not.equal(previousCategoryId);
 						
@@ -162,9 +167,3 @@ describe('Games', function() {
 		});
 	});
 });
-
-
-
-
-
-

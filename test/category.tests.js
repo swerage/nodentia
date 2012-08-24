@@ -1,16 +1,16 @@
 describe("Category", function() {
-	var mongoose      = require('mongoose')  
-	  , should        = require('should')
-	  , db 			  = require('../db/seed')['db']
-	  , _             = require('../libs/underscore')
-	  , category      = require('../models/category')['category']
-	  , game          = require('../models/game')['game']
-	  , team          = require('../models/team')['team']
-	  , eventHandling = require('../business/eventHandling')['eventHandling']
-	  , eventEmitter  = eventHandling.getEventEmitter()
-	  , connection    = mongoose.createConnection('mongodb://localhost/nodentia_test_db')
-	  , testCategory
-	  , testGame;
+	var mongoose      = require('mongoose')
+		, should        = require('should')
+		, db						= require('../db/seed')['db']
+		, _             = require('../libs/underscore')
+		, category      = require('../models/category')['category']
+		, game          = require('../models/game')['game']
+		, team          = require('../models/team')['team']
+		, eventHandling = require('../business/eventHandling')['eventHandling']
+		, eventEmitter  = eventHandling.getEventEmitter()
+		, connection    = mongoose.createConnection('mongodb://localhost/nodentia_test_db')
+		, testCategory
+		, testGame;
 	
 	team.establishDatabaseConnection(connection);
 	category.establishDatabaseConnection(connection);
@@ -22,14 +22,14 @@ describe("Category", function() {
 			testGame     = data.testGame;
 			done();
 		});
-	});	
+	});
 	
 	afterEach(function(done) {
-		testCategory = testGame = {};	
+		testCategory = testGame = {};
 		
 		db.clearData(function() {
 			done();
-		})
+		});
 	});
 	
 	it('can add a category', function(done) {
@@ -40,9 +40,9 @@ describe("Category", function() {
 		testCategory.teams.length.should.equal(2);
 		testCategory.starts.should.equal(new Date('2012-05-08'));
 		testCategory.ends.should.equal(new Date('2012-10-21'));
-		testCategory.latestGame.should.not.be.null;
-		testCategory.nextGame.should.not.be.null;
-		
+		testCategory.latestGame.should.not.be['null'];
+		testCategory.nextGame.should.not.be['null'];
+
 		done();
 	});
 	
@@ -61,7 +61,7 @@ describe("Category", function() {
 	
 	it('can get a category by id', function(done) {
 		category.getCategoryById(testCategory._id, function(fetchedCategory){
-			fetchedCategory.should.not.be.null;
+			fetchedCategory.should.not.be['null'];
 			fetchedCategory._id.toString().should.equal(testCategory._id.toString());
 			done();
 		});
@@ -69,7 +69,7 @@ describe("Category", function() {
 	
 	it('can get a category by route', function(done) {
 		category.getCategoryByRoute('/g/fotboll', function(fetchedCategory) {
-			fetchedCategory.should.not.be.null;
+			fetchedCategory.should.not.be['null'];
 			fetchedCategory.route.should.equal('/g/fotboll');
 			done();
 		});
@@ -92,7 +92,7 @@ describe("Category", function() {
 	
 	it('can get all divisions', function(done) {
 		category.getAllDivisions(function(divisions) {
-			divisions.should.not.be.empty;
+		divisions.should.not.be.empty;
 			done();
 		});
 	});
@@ -113,7 +113,6 @@ describe("Category", function() {
 	});
 	
 	it('can add a team', function(done) {
-		
 		team.addTeam({ abbr: 'T4', name: 'Team4'}, function(t4) {
 			testCategory.teams.push(t4);
 			
@@ -127,7 +126,7 @@ describe("Category", function() {
 	it('can remove a team', function(done) {
 		var team1 = testCategory.teams[0];
 		
-		testCategory.teams = _.without(testCategory.teams, team1);	
+		testCategory.teams = _.without(testCategory.teams, team1);
 		testCategory.save(function(e, savedCategory) {
 			savedCategory.teams.should.not.include(team1);
 			done();
@@ -135,7 +134,7 @@ describe("Category", function() {
 	});
 	
 	it('adds a new category when it is saved but doesnt exist', function(done) {
-		var newCategory = new category.getModel();
+		var newCategory = category.getModel();
 		newCategory.sport = 'Table Tennis';
 		
 		newCategory.should.not.have.property('_id');
@@ -212,7 +211,7 @@ describe("Category", function() {
 	});
 	
 	it('updates latestGame when the current latest game is edited', function(done) {
-		game.getGame(testCategory.latestGame, function(latestGame) { 
+		game.getGame(testCategory.latestGame, function(latestGame) {
 			latestGame.homeScore.should.equal(3);
 			latestGame.winner[0].abbr.should.equal('AIK');
 			
@@ -229,7 +228,7 @@ describe("Category", function() {
 	it('updates nextGame when the closest future game is edited', function (done) {
 		game.getGame(testCategory.nextGame, function(nextGame) {
 			var newHome = nextGame.away[0]
-			  , newAway = nextGame.home[0];
+              , newAway = nextGame.home[0];
 			
 			nextGame.home[0].abbr.should.equal('DIF');
 			nextGame.away[0].abbr.should.equal('AIK');
@@ -254,12 +253,12 @@ describe("Category", function() {
 	
 	it('does not update latestGame if the game saved is not most recent', function(done) {
 		game.getGame(testCategory.latestGame, function(initialGame) {
-			initialGame.played.should.equal(new Date('2012-03-01'));			
+			initialGame.played.should.equal(new Date('2012-03-01'));
 			initialGame.played = new Date('2012-02-28');
 			
 			game.addGame(initialGame, function(newGame) {
 				eventEmitter.emit('gameWasSaved', { game: newGame, callback: function(updatedCategory) {
-					updatedCategory.latestGame.should.not.equal(newGame._id);					
+					updatedCategory.latestGame.should.not.equal(newGame._id);
 					updatedCategory.latestGame.played.should.equal(new Date('2012-03-01'));
 					done();
 				}});
@@ -274,7 +273,7 @@ describe("Category", function() {
 			
 			game.addGame(initialGame, function(newGame) {
 				eventEmitter.emit('gameWasSaved', { game: newGame, callback: function(updatedCategory) {
-					updatedCategory.nextGame.should.not.equal(newGame._id);					
+					updatedCategory.nextGame.should.not.equal(newGame._id);
 					updatedCategory.nextGame.played.should.equal(new Date('2014-05-21'));
 					done();
 				}});
@@ -283,22 +282,22 @@ describe("Category", function() {
 	});
 	
 	it('clears latestGame when that game is removed', function (done) {
-		testCategory.latestGame.should.not.be.null;	
+		testCategory.latestGame.should.not.be['null'];
 		
 		eventEmitter.emit('gameWasRemoved', { gameId: testCategory.latestGame, callback: function(updatedCategory) {
 			category.getCategoryById(testCategory._id, function(updatedCategory) {
-				updatedCategory.should.have.property('latestGame', null);	
+				updatedCategory.should.have.property('latestGame', null);
 				done();
 			});
 		}});
 	});
 	
 	it('clears nextGame when that game is removed', function(done) {
-		testCategory.nextGame.should.not.be.null;
+		testCategory.nextGame.should.not.be['null'];
 
 		eventEmitter.emit('gameWasRemoved', { gameId: testCategory.nextGame._id, callback: function(updatedCategory) {
 			category.getCategoryById(testCategory._id, function(updatedCategory) {
-				updatedCategory.should.have.property('nextGame', null);	
+				updatedCategory.should.have.property('nextGame', null);
 				done();
 			});
 		}});
@@ -312,9 +311,3 @@ describe("Category", function() {
 		});
 	});
 });
-
-
-
-
-
-

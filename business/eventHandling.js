@@ -9,5 +9,5 @@ exports.eventHandling = (function() {
 	
 	return {
 		getEventEmitter: getEventEmitter
-	}
+	};
 }());

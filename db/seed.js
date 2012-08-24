@@ -1,26 +1,26 @@
 exports.db = (function() {
 	var mongoose        = require('mongoose')
-	  , schemas         = require('../db/schemas')["schemas"]
-	  , team            = require('../models/team')['team']
-	  , category        = require('../models/category')['category']
-	  , game            = require('../models/game')['game']
-	  , createdTeams    = []
-	  , createdCategory = {}
-	  , clearData
-	  , seedData;
+		, schemas         = require('../db/schemas')["schemas"]
+		, team            = require('../models/team')['team']
+		, category        = require('../models/category')['category']
+		, game            = require('../models/game')['game']
+		, createdTeams    = []
+		, createdCategory = {}
+		, clearData
+		, seedData;
 	
 	clearData = function(callback) {
 		var Category = category.getModel()
-		  , Team = team.getModel()
-		  , Game = game.getModel();
+			, Team = team.getModel()
+			, Game = game.getModel();
 		
 		createdTeams = [];
 		createdCategory = {};
 		
-		Category.remove({}, function() {			
+		Category.remove({}, function() {
 			Team.remove({}, function() {
 				Game.remove({}, function() {
-					callback();	
+					callback();
 				});
 			});
 		});
@@ -41,11 +41,11 @@ exports.db = (function() {
 						addCategories(callback);
 					} else {
 						callback();
-					}					
+					}
 				});
 			});
 		});
-	};
+	}
 	
 	function addCategories(callback) {
 		category.addCategory({ sport: 'fotboll', league: 'Allsvenskan', division: 'herr', teams: createdTeams, starts: new Date('2012-05-08'), ends: new Date('2012-10-21') }, function(savedCategory) {
@@ -59,18 +59,19 @@ exports.db = (function() {
 		game.addGame({ home: createdTeams[0], away: createdTeams[1], homeScore: 3, awayScore: 1, overtimeWin: false, shootoutWin: false, played: new Date('2012-03-01'), season: '2012', category: createdCategory, arena: 'Råsunda' }, function(createdGame) {
 			game.addGame({ home: createdTeams[1], away: createdTeams[0], homeScore: 0, awayScore: 0, overtimeWin: false, shootoutWin: false, played: new Date('2014-05-21'), season:  '2012', category: createdCategory, arena: 'Råsunda' }, function() {
 				category.getCategoryById(createdCategory._id, function(updatedCategory) {
-					callback({ 
+					
+					callback({
 						testCategory: updatedCategory
-					  , testGame: createdGame 
-					  , testTeams: createdTeams
+					, testGame: createdGame
+					, testTeams: createdTeams
 					});
 				});
-			});				
+			});
 		});
 	}
 	
 	return {
 		clearData: clearData
-	  ,	seedData: seedData
-	}
+		,	seedData: seedData
+	};
 }());

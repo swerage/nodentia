@@ -30,8 +30,8 @@ exports.getAdminViewModel = function(callback) {
 				
 				var result = {
 					categories: categories
-				  , teams: teams
-				  , games: games
+				, teams: teams
+				, games: games
 				};
 				
 				callback(result);
@@ -48,14 +48,14 @@ exports.getEditCategoryViewModel = function(categoryId, callback) {
 				
 				var vm = {
 					sports: sports
-				  , leagues: leagues
-				  , divisions: divisions
-				  , category: {}
+				, leagues: leagues
+				, divisions: divisions
+				, category: {}
 				};
 				
 				if (!!categoryId) {
 					category.getCategoryById(categoryId, function(fetchedCategory) {
-						vm.category = fetchedCategory;						
+						vm.category = fetchedCategory;
 						callback(vm);
 					});
 				} else {
@@ -68,11 +68,11 @@ exports.getEditCategoryViewModel = function(categoryId, callback) {
 
 exports.getEditGameViewModel = function(gameId, callback) {
 	team.getAllTeams(function(teams) {
-		category.getAllCategories(function(categories) {		
+		category.getAllCategories(function(categories) {
 			var vm = {
 				teams: teams
-			  ,	categories: categories
-			  , game: {}
+			,	categories: categories
+			, game: {}
 			};
 			
 			if (!!gameId) {
@@ -104,7 +104,7 @@ exports.getGame = function(id, callback) {
 	
 exports.getIndexViewModel = function(callback) {
 	category.getAllCategories(function(categories) {
-		var viewModel = formatter.getCategoryViewModel(categories);						
+		var viewModel = formatter.getCategoryViewModel(categories);
 		callback(viewModel);
 	});
 };
@@ -117,7 +117,7 @@ exports.getLeagues = function(callback) {
 	
 exports.getShowViewModel = function(route, callback) {
 	
-	category.getCategoryByRoute(route, function(gameCategory) {	
+	category.getCategoryByRoute(route, function(gameCategory) {
 		if (!gameCategory.latestGame) {
 			callback(null);
 		} else {
@@ -153,13 +153,13 @@ exports.getTeams = function(callback) {
 };
 
 exports.saveCategory = function(editedCategory, callback) {
-	category.saveCategory(editedCategory, function() { 
+	category.saveCategory(editedCategory, function() {
 		callback();
 	});
 };
 	
 exports.saveGame = function(gameToSave, callback) {
-	game.saveGame(gameToSave, function() { 
+	game.saveGame(gameToSave, function() {
 		callback();
 	});
 };

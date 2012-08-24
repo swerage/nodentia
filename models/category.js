@@ -1,5 +1,5 @@
 exports.category = (function() {
-	var addCategory, addTeamToCategory, Category, removeGameFromCategory, establishDatabaseConnection, eventEmitter, eventHandling, 
+	var addCategory, addTeamToCategory, Category, removeGameFromCategory, establishDatabaseConnection, eventEmitter, eventHandling,
 		getAllCategories, getAllDivisions, getAllLeagues, getAllSports, getCategoryById, getCategoryByRoute, getModel,
 		removeTeamFromCategory, saveCategory, updateLatestGame, updateNextGame, _;
 	
@@ -10,13 +10,13 @@ exports.category = (function() {
 	addCategory = function(props, callback) {
 		var category = new Category();
 		
-		category.sport      = props.sport; 
+		category.sport      = props.sport;
 		category.league     = props.league;
 		category.division   = props.division;
 		category.starts     = props.starts;
 		category.ends       = props.ends;
 		category.latestGame = props.latestGame;
-		category.teams      = props.teams;	
+		category.teams      = props.teams;
 		category.matchup    = getMatchupFromTeams(category.teams);
 		category.route      = getRouteFromSportAndDivision(category.sport, category.division);
 		
@@ -31,14 +31,14 @@ exports.category = (function() {
 		
 		category.save(function() {
 			callback();
-		})
+		});
 	};
 	
 	establishDatabaseConnection = function(connection) {
 		var mongoose               = require('mongoose')
-		  , schemas                = require('../db/schemas')["schemas"]
-		  , categorySchema         = schemas.categorySchema
-		  , gameSchema             = schemas.gameSchema;
+			, schemas                = require('../db/schemas')["schemas"]
+			, categorySchema         = schemas.categorySchema
+			, gameSchema             = schemas.gameSchema;
 		
 		Category = connection.model('Category', categorySchema);
 		mongoose.model('Game', gameSchema);
@@ -52,7 +52,7 @@ exports.category = (function() {
 		
 	getAllDivisions = function(callback) {
 		Category.find({}, 'division', function (e, divisions){
-			var uniqueResults = _.uniq(_.pluck(divisions, 'division')); //todo: super lame but mongoose distinct just didnt work, why?			
+			var uniqueResults = _.uniq(_.pluck(divisions, 'division')); //todo: super lame but mongoose distinct just didnt work, why?
 			callback(uniqueResults);
 		});
 	};
@@ -98,9 +98,9 @@ exports.category = (function() {
 	};
 	
 	removeTeamFromCategory = function(category, team, callback) {
-		
-		category.teams = _.without(category.teams, team);				
+		category.teams = _.without(category.teams, team);
 		category.matchup = getMatchupFromTeams(category.teams);
+		
 		category.save(function() {
 			callback();
 		});
@@ -108,9 +108,9 @@ exports.category = (function() {
 	
 	saveCategory = function(category, callback) {
 
-		getCategoryById(category._id, function(existingCategory) {	
+		getCategoryById(category._id, function(existingCategory) {
 			if (!!existingCategory) {
-				existingCategory.sport      = category.sport; 
+				existingCategory.sport      = category.sport;
 				existingCategory.league     = category.league;
 				existingCategory.division   = category.division;
 				existingCategory.route      = category.route;
@@ -119,7 +119,7 @@ exports.category = (function() {
 				existingCategory.latestGame = category.latestGame;
 				existingCategory.teams      = category.teams;
 				existingCategory.matchup    = getMatchupFromTeams(category.teams);
-				existingCategory.route      = getRouteFromSportAndDivision(category.sport, category.division); 
+				existingCategory.route      = getRouteFromSportAndDivision(category.sport, category.division);
 				
 				existingCategory.save(function(e, savedCategory) {
 					callback(savedCategory);
@@ -133,7 +133,7 @@ exports.category = (function() {
 	updateLatestGame = function(params, callback) {
 		getCategoryById(params.game.category, function(category) {
 			var savedGameIsLatestGame = !!category.latestGame && category.latestGame._id.toString() === params.game._id.toString()
-			  , savedGameIsNewerThanCurrentLatestGame =  !category.latestGame || category.latestGame.played < params.game.played;
+				, savedGameIsNewerThanCurrentLatestGame =  !category.latestGame || category.latestGame.played < params.game.played;
 			
 			if (savedGameIsLatestGame) {
 				updateExistingCategoryGame(category, category.latestGame, params.game, function(updatedCategory) {
@@ -146,7 +146,7 @@ exports.category = (function() {
 					getCategoryById(updatedCategory._id, callback);
 				});
 			} else {
-				callback(category);	
+				callback(category);
 			}
 		});
 	};
@@ -154,7 +154,7 @@ exports.category = (function() {
 	updateNextGame = function(params, callback) {
 		getCategoryById(params.game.category, function(category) {
 			var savedGameIsNextGame = !!category.nextGame && category.nextGame._id.toString() === params.game._id.toString()
-			  , savedGameIsCloserToNowThanCurrentNextGame = !category.nextGame || category.nextGame.played > params.game.played
+				, savedGameIsCloserToNowThanCurrentNextGame = !category.nextGame || category.nextGame.played > params.game.played;
 			
 			if (savedGameIsNextGame) {
 				updateExistingCategoryGame(category, category.nextGame, params.game, function(updatedCategory) {
@@ -184,7 +184,7 @@ exports.category = (function() {
 	function removeLatestGameFromCategory(gameId, callback) {
 		Category.findOne({ 'latestGame': gameId }, function (e, category) {
 			if (!!category) {
-				category.latestGame = null;				
+				category.latestGame = null;
 				saveCategory(category, function(savedCategory) {
 					callback(savedCategory);
 				});
@@ -197,7 +197,7 @@ exports.category = (function() {
 	function removeNextGameFromCategory(gameId, callback) {
 		Category.findOne({ 'nextGame': gameId }, function (e, category) {
 			if (!!category) {
-				category.nextGame = null;				
+				category.nextGame = null;
 				saveCategory(category, function(savedCategory) {
 					callback(savedCategory);
 				});
@@ -208,9 +208,9 @@ exports.category = (function() {
 	}
 	
 	function updateExistingCategoryGame(category, categoryGame, savedGame, callback) {
-		categoryGame.played 	= savedGame.played;
-		categoryGame.homeScore 	= savedGame.homeScore;
-		categoryGame.awayScore 	= savedGame.awayScore;
+		categoryGame.played			= savedGame.played;
+		categoryGame.homeScore	= savedGame.homeScore;
+		categoryGame.awayScore	= savedGame.awayScore;
 
 		if (+categoryGame.homeScore !== +categoryGame.awayScore) {
 			categoryGame.winner = categoryGame.homeScore > categoryGame.awayScore ? categoryGame.home : categoryGame.away;
@@ -230,7 +230,7 @@ exports.category = (function() {
 			updateLatestGame(params, params.callback);
 		} else {
 			updateNextGame(params, params.callback);
-		}		
+		}
 	});
 	
 	eventEmitter.on('gameWasRemoved', function(params) {
@@ -238,21 +238,21 @@ exports.category = (function() {
 	});
 	
 	return {
-	  	addCategory: addCategory
-	  ,	addTeamToCategory: addTeamToCategory
-	  ,	establishDatabaseConnection: establishDatabaseConnection
-	  , getAllCategories: getAllCategories
-	  , getAllDivisions: getAllDivisions
-	  , getAllLeagues: getAllLeagues
-	  , getAllSports: getAllSports
-	  ,	getCategoryById: getCategoryById
-	  , getCategoryByRoute: getCategoryByRoute
-	  , getModel: getModel	
-	  , getRouteFromSportAndDivision: getRouteFromSportAndDivision
-	  , removeGameFromCategory: removeGameFromCategory
-	  , removeTeamFromCategory: removeTeamFromCategory
-	  , saveCategory: saveCategory
-	  , updateLatestGame: updateLatestGame
-	  , updateNextGame: updateNextGame
-	}
+		addCategory: addCategory
+	,	addTeamToCategory: addTeamToCategory
+	,	establishDatabaseConnection: establishDatabaseConnection
+	, getAllCategories: getAllCategories
+	, getAllDivisions: getAllDivisions
+	, getAllLeagues: getAllLeagues
+	, getAllSports: getAllSports
+	,	getCategoryById: getCategoryById
+	, getCategoryByRoute: getCategoryByRoute
+	, getModel: getModel
+	, getRouteFromSportAndDivision: getRouteFromSportAndDivision
+	, removeGameFromCategory: removeGameFromCategory
+	, removeTeamFromCategory: removeTeamFromCategory
+	, saveCategory: saveCategory
+	, updateLatestGame: updateLatestGame
+	, updateNextGame: updateNextGame
+	};
 }());

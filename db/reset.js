@@ -1,11 +1,11 @@
 (function() {
 	var mongoose        = require('mongoose')
-	  , connection      = mongoose.createConnection('mongodb://localhost/nodentia_db')
-	  , db              = require('../db/seed')['db']
-	  , schemas         = require('../db/schemas')["schemas"]
-	  , team            = require('../models/team')['team']
-	  , category        = require('../models/category')['category']
-	  , game            = require('../models/game')['game'];
+		, connection      = mongoose.createConnection('mongodb://localhost/nodentia_db')
+		, db              = require('../db/seed')['db']
+		, schemas         = require('../db/schemas')["schemas"]
+		, team            = require('../models/team')['team']
+		, category        = require('../models/category')['category']
+		, game            = require('../models/game')['game'];
 	
 	team.establishDatabaseConnection(connection);
 	category.establishDatabaseConnection(connection);
