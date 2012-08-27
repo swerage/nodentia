@@ -35,25 +35,25 @@ window.nodentia.admin.eventHandlers = (function(){
 		
 		$(document).on('click', '#newCategory', function() {
 			nodentia.admin.renderCategoryEditor();
-		})
+		});
 		
 		$(document).on('click', '#saveGame', function() {
 			var game, id;
 			
 			game = {
-				home: 		 $('#home').find('option:selected').data('team')
-			  ,	away: 		 $('#away').find('option:selected').data('team')
-			  ,	homeScore: 	 $('#homeScore').val()
-			  ,	awayScore: 	 $('#awayScore').val()
-			  ,	overtimeWin: $('#overtimeWin').is(':checked') ? 1 : 0
-			  ,	shootoutWin: $('#shootoutWin').is(':checked') ? 1 : 0
-			  ,	played: 	 $('#play-date').val() + ' ' + $("#play-time").val()
-			  ,	season: 	 $('#season').val()
-			  ,	category: 	 $('#category').val()
-			  ,	arena: 		 $('#arena').val()
+				home:					$('#home').find('option:selected').data('team')
+			,	away:					$('#away').find('option:selected').data('team')
+			,	homeScore:		$('#homeScore').val()
+			,	awayScore:		$('#awayScore').val()
+			,	overtimeWin:	$('#overtimeWin').is(':checked') ? 1 : 0
+			,	shootoutWin:	$('#shootoutWin').is(':checked') ? 1 : 0
+			,	played:				$('#play-date').val() + ' ' + $("#play-time").val()
+			,	season:				$('#season').val()
+			,	category:			$('#category').val()
+			,	arena:				$('#arena').val()
 			};
 			
-			id = $("#_id").val();			
+			id = $("#_id").val();
 			if (!!id && id.length > 0) {
 				game._id = id;
 			}
@@ -64,7 +64,7 @@ window.nodentia.admin.eventHandlers = (function(){
 		});
 		
 		$(document).on('click', '#removeGame', function() {
-			var id = $("#_id").val();			
+			var id = $("#_id").val();
 			
 			nodentia.admin.removeGame(id, function() {
 				$("#edit-area").slideUp();
@@ -75,12 +75,12 @@ window.nodentia.admin.eventHandlers = (function(){
 			var category, id;
 			
 			category = {
-				sport: 	  $("#sport").val(),
+				sport:		$("#sport").val(),
 				league:   $("#league").val(),
 				division: $("#division").val(),
 				starts:   $("#starts").val(),
-				ends: 	  $("#ends").val(),
-				teams: 	  $.map($(".team-row").find("option:selected"), function(el, i) { return $(el).data("team"); })
+				ends:			$("#ends").val(),
+				teams:		$.map($(".team-row").find("option:selected"), function(el, i) { return $(el).data("team"); })
 			};
 			
 			id = $("#_id").val();
@@ -127,8 +127,8 @@ window.nodentia.admin.eventHandlers = (function(){
 	bindPlugins = function() {
 		
 		$(".date-picker").datepicker({
-			dateFormat: 'yy-mm-dd',
-		});		
+			dateFormat: 'yy-mm-dd'
+		});
 	};
 	
 	return {

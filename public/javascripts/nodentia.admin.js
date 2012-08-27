@@ -22,10 +22,10 @@ nodentia.admin = (function() {
 	renderGameEditor = function(id) {
 		$.get("/admin/game/edit", { id: id }, function(gameMarkup){
 			$("#edit-area").slideUp(function(){
-				$(this).html(gameMarkup).slideDown();	
+				$(this).html(gameMarkup).slideDown();
 				nodentia.admin.eventHandlers.bindPlugins();
 			});
-		})
+		});
 	};
 	
 	renderCategoryEditor = function(id) {
@@ -44,25 +44,25 @@ nodentia.admin = (function() {
 	};
 	
 	saveCategory = function(category, callback) {
-		$.post('/admin/category/save', { category: category }, function(response) { 
+		$.post('/admin/category/save', { category: category }, function(response) {
 			callback();
 		});
 	};
 	
 	saveGame = function(game) {
-		$.post('/admin/game/save', { game: game }, function(response) { 
+		$.post('/admin/game/save', { game: game }, function(response) {
 			callback();
 		});
 	};
 	
 	return {
 		init: init
-	  , removeGame: removeGame	
-	  ,	removeTeam: removeTeam
-	  ,	renderGameEditor: renderGameEditor
-	  ,	renderCategoryEditor: renderCategoryEditor
-	  ,	renderTeamRowWithTeams: renderTeamRowWithTeams
-	  ,	saveCategory: saveCategory
-	  ,	saveGame: saveGame
-	}
+		, removeGame: removeGame
+		,	removeTeam: removeTeam
+		,	renderGameEditor: renderGameEditor
+		,	renderCategoryEditor: renderCategoryEditor
+		,	renderTeamRowWithTeams: renderTeamRowWithTeams
+		,	saveCategory: saveCategory
+		,	saveGame: saveGame
+	};
 }());

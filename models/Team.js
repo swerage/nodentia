@@ -34,9 +34,9 @@ exports.team = (function() {
 	
 	return {
 		addTeam: addTeam
-	  ,	establishDatabaseConnection: establishDatabaseConnection
-	  ,	getAllTeams: getAllTeams
-	  ,	getModel: getModel
-	  , getTeam: getTeam
-	}
+		,	establishDatabaseConnection: establishDatabaseConnection
+		,	getAllTeams: getAllTeams
+		,	getModel: getModel
+		, getTeam: getTeam
+	};
 }());

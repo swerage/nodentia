@@ -62,7 +62,7 @@ exports.game = (function() {
 
 	getModel = function() {
 		return Game;
-	}
+	};
 
 	removeGame = function(game, callback) {
 		Game.find({

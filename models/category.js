@@ -223,6 +223,10 @@ exports.category = (function() {
 		});
 	}
 	
+	eventEmitter.on('gameWasRemoved', function(params) {
+		removeGameFromCategory(params.gameId, params.callback);
+	});
+
 	eventEmitter.on('gameWasSaved', function(params) {
 		var gameHasBeenPlayed = params.game.played <= new Date();
 
@@ -231,10 +235,6 @@ exports.category = (function() {
 		} else {
 			updateNextGame(params, params.callback);
 		}
-	});
-	
-	eventEmitter.on('gameWasRemoved', function(params) {
-		removeGameFromCategory(params.gameId, params.callback);
 	});
 	
 	return {
